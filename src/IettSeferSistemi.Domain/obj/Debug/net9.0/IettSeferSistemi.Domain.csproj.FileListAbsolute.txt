@@ -1,0 +1,11 @@
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Domain\bin\Debug\net9.0\IettSeferSistemi.Domain.deps.json
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Domain\bin\Debug\net9.0\IettSeferSistemi.Domain.dll
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Domain\bin\Debug\net9.0\IettSeferSistemi.Domain.pdb
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Domain\obj\Debug\net9.0\IettSeferSistemi.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Domain\obj\Debug\net9.0\IettSeferSistemi.Domain.AssemblyInfoInputs.cache
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Domain\obj\Debug\net9.0\IettSeferSistemi.Domain.AssemblyInfo.cs
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Domain\obj\Debug\net9.0\IettSeferSistemi.Domain.csproj.CoreCompileInputs.cache
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Domain\obj\Debug\net9.0\IettSeferSistemi.Domain.dll
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Domain\obj\Debug\net9.0\refint\IettSeferSistemi.Domain.dll
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Domain\obj\Debug\net9.0\IettSeferSistemi.Domain.pdb
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Domain\obj\Debug\net9.0\ref\IettSeferSistemi.Domain.dll

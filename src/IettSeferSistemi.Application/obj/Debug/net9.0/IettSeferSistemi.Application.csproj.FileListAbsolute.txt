@@ -1,0 +1,15 @@
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Application\bin\Debug\net9.0\IettSeferSistemi.Application.deps.json
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Application\bin\Debug\net9.0\IettSeferSistemi.Application.dll
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Application\bin\Debug\net9.0\IettSeferSistemi.Application.pdb
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Application\bin\Debug\net9.0\IettSeferSistemi.Domain.dll
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Application\bin\Debug\net9.0\IettSeferSistemi.Domain.pdb
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Application\obj\Debug\net9.0\IettSeferSistemi.Application.csproj.AssemblyReference.cache
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Application\obj\Debug\net9.0\IettSeferSistemi.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Application\obj\Debug\net9.0\IettSeferSistemi.Application.AssemblyInfoInputs.cache
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Application\obj\Debug\net9.0\IettSeferSistemi.Application.AssemblyInfo.cs
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Application\obj\Debug\net9.0\IettSeferSistemi.Application.csproj.CoreCompileInputs.cache
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Application\obj\Debug\net9.0\IettSefe.5EEAE7A0.Up2Date
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Application\obj\Debug\net9.0\IettSeferSistemi.Application.dll
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Application\obj\Debug\net9.0\refint\IettSeferSistemi.Application.dll
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Application\obj\Debug\net9.0\IettSeferSistemi.Application.pdb
+C:\Users\beratz\Desktop\iett-proje\sefer-takip-sistemi\src\IettSeferSistemi.Application\obj\Debug\net9.0\ref\IettSeferSistemi.Application.dll
