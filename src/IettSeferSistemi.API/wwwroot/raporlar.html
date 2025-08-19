@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raporlar - İETT Sefer Takip Sistemi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'soft-blue': '#e0f2fe',
+                        'soft-green': '#f0fdf4',
+                        'soft-purple': '#faf5ff',
+                        'soft-gray': '#f8fafc',
+                        'accent-blue': '#0ea5e9',
+                        'accent-green': '#22c55e',
+                        'accent-purple': '#a855f7'
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gradient-to-br from-soft-gray to-soft-blue min-h-screen">
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-accent-blue p-2 rounded-lg">
+                        <i class="fas fa-bus text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">İETT</h1>
+                        <p class="text-xs text-gray-500">Sefer Takip Sistemi</p>
+                    </div>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="/" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Anasayfa</a>
+                    <a href="/seferler" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Seferler</a>
+                    <a href="/hatlar" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Hatlar</a>
+                    <a href="/users" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Kullanıcılar</a>
+                    <a href="/raporlar" class="text-accent-blue font-medium border-b-2 border-accent-blue pb-1">Raporlar</a>
+                    <a href="/swagger" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">API</a>
+                </nav>
+                
+                <!-- User Info Dropdown -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative" id="userDropdown">
+                        <button class="flex items-center space-x-3 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 transition-all shadow-sm" onclick="toggleUserDropdown()">
+                            <div class="w-8 h-8 bg-gradient-to-r from-accent-blue to-blue-600 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white text-sm"></i>
+                            </div>
+                            <div class="hidden sm:block text-left">
+                                <div class="text-sm font-semibold text-gray-800" id="headerUserName">Kullanıcı</div>
+                                <div class="text-xs text-gray-500" id="headerUserRole">Kullanıcı</div>
+                            </div>
+                            <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" id="dropdownIcon"></i>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 hidden" id="dropdownMenu">
+                            <div class="px-4 py-3 border-b border-gray-100">
+                                <div class="text-sm font-semibold text-gray-800" id="dropdownUserName">Kullanıcı</div>
+                                <div class="text-xs text-gray-500" id="dropdownUserEmail">kullanici@iett.gov.tr</div>
+                                <div class="text-xs text-accent-blue font-medium mt-1" id="dropdownUserRole">Kullanıcı</div>
+                            </div>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-user-circle mr-3 text-gray-400"></i>
+                                Profil Ayarları
+                            </a>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-cog mr-3 text-gray-400"></i>
+                                Hesap Ayarları
+                            </a>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-bell mr-3 text-gray-400"></i>
+                                Bildirimler
+                            </a>
+                            <div class="border-t border-gray-100 mt-2 pt-2">
+                                <button class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors" onclick="logout()">
+                                    <i class="fas fa-sign-out-alt mr-3 text-red-500"></i>
+                                    Çıkış Yap
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button class="md:hidden p-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-bars text-gray-600"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Raporlar</h1>
+                    <p class="text-gray-600">Sefer ve performans raporları</p>
+                </div>
+                <div class="flex space-x-3">
+                    <button onclick="exportReport('pdf')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-file-pdf mr-2"></i>
+                        PDF İndir
+                    </button>
+                    <button onclick="exportReport('excel')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-file-excel mr-2"></i>
+                        Excel İndir
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Type Selection -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Rapor Türü Seçimi</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-blue-50 transition-colors" onclick="(async () => await selectReportType('daily-summary'))()" id="report-daily-summary">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-calendar-day text-blue-600 mr-2"></i>
+                        <h3 class="font-semibold text-gray-900">Günlük Özet</h3>
+                    </div>
+                    <p class="text-sm text-gray-600">Toplam sefer ve yolcu sayısı (günlük)</p>
+                </div>
+                <div class="border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-green-50 transition-colors" onclick="(async () => await selectReportType('driver-monthly'))()" id="report-driver-monthly">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-user text-green-600 mr-2"></i>
+                        <h3 class="font-semibold text-gray-900">Şoför Bazlı</h3>
+                    </div>
+                    <p class="text-sm text-gray-600">Şoför bazlı aylık sefer sayısı</p>
+                </div>
+                <div class="border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-purple-50 transition-colors" onclick="(async () => await selectReportType('route-comparison'))()" id="report-route-comparison">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-route text-purple-600 mr-2"></i>
+                        <h3 class="font-semibold text-gray-900">Hat Karşılaştırması</h3>
+                    </div>
+                    <p class="text-sm text-gray-600">Hat karşılaştırması (aylık toplam yolcu)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Filters -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8" id="reportFilters">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Rapor Filtreleri</h2>
+            
+            <!-- Common Filters -->
+            <div class="grid grid-cols-4 gap-4 items-end" id="commonFilters">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Başlangıç Tarihi</label>
+                    <input type="date" id="startDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Bitiş Tarihi</label>
+                    <input type="date" id="endDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                </div>
+                <div id="hatFilterDiv">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Hat</label>
+                    <select id="hatFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                        <option value="">Tüm Hatlar</option>
+                        <option value="15">15 - Eminönü - Bağcılar</option>
+                        <option value="34">34 - Kadıköy - Mecidiyeköy</option>
+                        <option value="500T">500T - Taksim - Beylikdüzü</option>
+                    </select>
+                </div>
+                <div id="soforFilterDiv" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Şoför</label>
+                    <select id="soforFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                        <option value="">Şoför Seçin</option>
+                        <option value="1">Ahmet Yılmaz</option>
+                        <option value="2">Mehmet Demir</option>
+                        <option value="3">Ali Kaya</option>
+                    </select>
+                </div>
+                <div id="hat1FilterDiv" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">İlk Hat</label>
+                    <select id="hat1Filter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                        <option value="">Hat Seçin</option>
+                        <option value="15">15 - Eminönü - Bağcılar</option>
+                        <option value="34">34 - Kadıköy - Mecidiyeköy</option>
+                        <option value="500T">500T - Taksim - Beylikdüzü</option>
+                    </select>
+                </div>
+                <div id="hat2FilterDiv" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">İkinci Hat</label>
+                    <select id="hat2Filter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                        <option value="">Hat Seçin</option>
+                        <option value="15">15 - Eminönü - Bağcılar</option>
+                        <option value="34">34 - Kadıköy - Mecidiyeköy</option>
+                        <option value="500T">500T - Taksim - Beylikdüzü</option>
+                    </select>
+                </div>
+                <!-- Rapor Oluştur Butonu -->
+                <div>
+                    <button onclick="generateReport()" class="w-full bg-accent-blue hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-chart-bar mr-2"></i>
+                        Rapor Oluştur
+                    </button>
+                </div>
+            </div>
+            
+
+
+
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100">
+                        <i class="fas fa-bus text-blue-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Toplam Sefer</p>
+                        <p class="text-2xl font-bold text-gray-900" id="toplamSefer">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100">
+                        <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Tamamlanan</p>
+                        <p class="text-2xl font-bold text-gray-900" id="tamamlananSefer">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-100">
+                        <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Ortalama Süre</p>
+                        <p class="text-2xl font-bold text-gray-900" id="ortalamaSure">0 dk</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-100">
+                        <i class="fas fa-percentage text-purple-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Başarı Oranı</p>
+                        <p class="text-2xl font-bold text-gray-900" id="basariOrani">0%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div id="chartsSection" class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Günlük Sefer Grafiği -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Günlük Sefer Sayıları</h3>
+                <div class="relative h-64">
+                    <canvas id="dailyPassengerChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Günlük Yolcu İstatistikleri -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Günlük Yolcu İstatistikleri</h3>
+                <div class="relative h-64">
+                    <canvas id="dailyTripsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Reports Table -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Detaylı Sefer Raporu</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tarih</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hat</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Toplam Sefer</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tamamlanan</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İptal</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Başarı Oranı</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ortalama Süre</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Report rows will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let reportData = [];
+        let dailyChart = null;
+        let passengerChart = null;
+        let currentReportType = 'daily-summary'; // Default report type
+
+        // Session kontrolü
+        function checkSession() {
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            if (!isLoggedIn || isLoggedIn !== 'true') {
+                window.location.href = '/login';
+                return false;
+            }
+            return true;
+        }
+
+        // Kullanıcı bilgilerini yükle
+        function loadUserData() {
+            const userName = sessionStorage.getItem('userName') || 'Kullanıcı';
+            const userEmail = sessionStorage.getItem('userEmail') || 'kullanici@iett.gov.tr';
+            const userRole = sessionStorage.getItem('userRole') || 'kullanici';
+
+            document.getElementById('headerUserName').textContent = userName;
+            document.getElementById('headerUserRole').textContent = getRoleDisplayText(userRole);
+            document.getElementById('dropdownUserName').textContent = userName;
+            document.getElementById('dropdownUserEmail').textContent = userEmail;
+            document.getElementById('dropdownUserRole').textContent = getRoleDisplayText(userRole);
+        }
+
+        function getRoleDisplayText(role) {
+            switch(role) {
+                case 'admin': return 'Sistem Yöneticisi';
+                case 'sofor': return 'Şoför';
+                case 'yonetici': return 'Yönetici';
+                default: return 'Kullanıcı';
+            }
+        }
+
+        // Dropdown toggle
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('dropdownMenu');
+            const icon = document.getElementById('dropdownIcon');
+            
+            dropdown.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
+
+        // Logout
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = '/login';
+        }
+
+        // Demo rapor verisi yükle
+        async function loadDemoReportData() {
+            try {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                const hatFilter = document.getElementById('hatFilter').value;
+                
+                let url = '/api/raporlar/gunluk-ozet?';
+                const params = new URLSearchParams();
+                
+                if (startDate) params.append('baslangic', startDate);
+                if (endDate) params.append('bitis', endDate);
+                if (hatFilter) params.append('hatId', hatFilter);
+                
+                url += params.toString();
+                
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`API çağrısı başarısız: ${response.status}`);
+                }
+                
+                reportData = await response.json();
+            } catch (error) {
+                console.error('Veri yükleme hatası:', error);
+                // Fallback demo data
+                reportData = [
+                    {
+                        tarih: '2024-01-15',
+                        hat: '15',
+                        hatAdi: 'Eminönü - Bağcılar',
+                        toplamSefer: 45,
+                        tamamlanan: 42,
+                        iptal: 3,
+                        toplamYolcu: 1250,
+                        ortalamaSure: 35
+                    },
+                    {
+                        tarih: '2024-01-16',
+                        hat: '28',
+                        hatAdi: 'Edirnekapı - Etiler',
+                        toplamSefer: 38,
+                        tamamlanan: 36,
+                        iptal: 2,
+                        toplamYolcu: 980,
+                        ortalamaSure: 42
+                    }
+                ];
+                showNotification('Veri yüklenemedi, demo veriler gösteriliyor.', 'warning');
+            }
+        }
+
+        // Rapor tablosunu render et
+        function renderReportTable(data) {
+            const tbody = document.getElementById('reportTableBody');
+            tbody.innerHTML = '';
+
+            // Rapor türüne göre tablo başlıklarını güncelle
+            updateTableHeaders();
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                
+                // Rapor türüne göre satır içeriğini oluştur
+                row.innerHTML = generateRowContent(item);
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateTableHeaders() {
+            const thead = document.querySelector('table thead tr');
+            
+            switch(currentReportType) {
+                case 'daily-summary':
+                    thead.innerHTML = `
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tarih</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Toplam Sefer</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Toplam Yolcu</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ortalama Süre</th>
+                    `;
+                    break;
+                case 'driver-monthly':
+                    thead.innerHTML = `
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Şoför</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Yıl</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ay</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sefer Sayısı</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ortalama Süre</th>
+                    `;
+                    break;
+                case 'route-comparison':
+                    thead.innerHTML = `
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hat</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hat Adı</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ay</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Toplam Yolcu</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ortalama Süre</th>
+                    `;
+                    break;
+                default:
+                    thead.innerHTML = `
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tarih</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hat</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Toplam Sefer</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tamamlanan</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İptal</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Başarı Oranı</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ortalama Süre</th>
+                    `;
+            }
+        }
+
+        function getMonthName(monthNumber) {
+            const months = {
+                1: 'Ocak', 2: 'Şubat', 3: 'Mart', 4: 'Nisan',
+                5: 'Mayıs', 6: 'Haziran', 7: 'Temmuz', 8: 'Ağustos',
+                9: 'Eylül', 10: 'Ekim', 11: 'Kasım', 12: 'Aralık'
+            };
+            return months[monthNumber] || monthNumber;
+        }
+
+        function generateRowContent(item) {
+            switch(currentReportType) {
+                case 'daily-summary':
+                    return `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.tarih}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.toplamSefer}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">${item.toplamYolcu}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${Math.round(item.ortalamaSure)} dk</td>
+                    `;
+                case 'driver-monthly':
+                    return `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">${item.sofor}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.yil}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${getMonthName(item.ay)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">${item.seferSayisi}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${Math.round(Math.abs(item.ortalamaSure))} dk</td>
+                    `;
+                case 'route-comparison':
+                    return `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">${item.hat}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.hatAdi}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.ay}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600 font-medium">${item.toplamYolcu}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${Math.round(Math.abs(item.ortalamaSure))} dk</td>
+                    `;
+                default:
+                    const basariOrani = Math.round((item.tamamlanan / item.toplamSefer) * 100);
+                    return `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.tarih}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div class="font-medium">${item.hat}</div>
+                            <div class="text-gray-500 text-xs">${item.hatAdi}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.toplamSefer}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">${item.tamamlanan}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-medium">${item.iptal}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div class="flex items-center">
+                                <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                    <div class="bg-green-600 h-2 rounded-full" style="width: ${basariOrani}%"></div>
+                                </div>
+                                <span class="text-sm font-medium">${basariOrani}%</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${Math.round(Math.abs(item.ortalamaSure))} dk</td>
+                    `;
+            }
+        }
+
+        // İstatistikleri güncelle
+        function updateStats(data) {
+            switch(currentReportType) {
+                case 'daily-summary':
+                    updateDailySummaryStats(data);
+                    break;
+                case 'driver-monthly':
+                    updateDriverMonthlyStats(data);
+                    break;
+                case 'route-comparison':
+                    updateRouteComparisonStats(data);
+                    break;
+                default:
+                    updateDefaultStats(data);
+            }
+        }
+
+        function updateDailySummaryStats(data) {
+            const toplamSefer = data.reduce((sum, item) => sum + item.toplamSefer, 0);
+            const toplamYolcu = data.reduce((sum, item) => sum + item.toplamYolcu, 0);
+            const ortalamaSure = data.length > 0 ? Math.round(data.reduce((sum, item) => sum + item.ortalamaSure, 0) / data.length) : 0;
+            const gunlukOrtalama = data.length > 0 ? Math.round(toplamSefer / data.length) : 0;
+
+            // Başlıkları güncelle
+            document.querySelector('#toplamSefer').parentElement.querySelector('p').textContent = 'Toplam Sefer';
+            document.querySelector('#tamamlananSefer').parentElement.querySelector('p').textContent = 'Toplam Yolcu';
+            document.querySelector('#ortalamaSure').parentElement.querySelector('p').textContent = 'Ortalama Süre';
+            document.querySelector('#basariOrani').parentElement.querySelector('p').textContent = 'Günlük Ortalama';
+
+            document.getElementById('toplamSefer').textContent = toplamSefer;
+            document.getElementById('tamamlananSefer').textContent = toplamYolcu;
+            document.getElementById('ortalamaSure').textContent = ortalamaSure + ' dk';
+            document.getElementById('basariOrani').textContent = gunlukOrtalama + ' sefer/gün';
+        }
+
+        function updateDriverMonthlyStats(data) {
+            const toplamSefer = data.reduce((sum, item) => sum + item.seferSayisi, 0);
+            const benzersizSoforler = [...new Set(data.map(item => item.sofor))].length;
+            const ortalamaSure = data.length > 0 ? Math.round(data.reduce((sum, item) => sum + item.ortalamaSure, 0) / data.length) : 0;
+            const aylikOrtalama = benzersizSoforler > 0 ? Math.round(toplamSefer / benzersizSoforler) : 0;
+
+            // Başlıkları güncelle
+            document.querySelector('#toplamSefer').parentElement.querySelector('p').textContent = 'Toplam Sefer';
+            document.querySelector('#tamamlananSefer').parentElement.querySelector('p').textContent = 'Şoför Sayısı';
+            document.querySelector('#ortalamaSure').parentElement.querySelector('p').textContent = 'Ortalama Süre';
+            document.querySelector('#basariOrani').parentElement.querySelector('p').textContent = 'Şoför Başına Ort.';
+
+            document.getElementById('toplamSefer').textContent = toplamSefer;
+            document.getElementById('tamamlananSefer').textContent = benzersizSoforler;
+            document.getElementById('ortalamaSure').textContent = ortalamaSure + ' dk';
+            document.getElementById('basariOrani').textContent = aylikOrtalama + ' sefer/şoför';
+        }
+
+        function updateRouteComparisonStats(data) {
+            const toplamYolcu = data.reduce((sum, item) => sum + item.toplamYolcu, 0);
+            const benzersizHatlar = [...new Set(data.map(item => item.hat))].length;
+            const ortalamaSure = data.length > 0 ? Math.round(data.reduce((sum, item) => sum + item.ortalamaSure, 0) / data.length) : 0;
+            const hatBasinaOrtalama = benzersizHatlar > 0 ? Math.round(toplamYolcu / benzersizHatlar) : 0;
+
+            // Başlıkları güncelle
+            document.querySelector('#toplamSefer').parentElement.querySelector('p').textContent = 'Toplam Yolcu';
+            document.querySelector('#tamamlananSefer').parentElement.querySelector('p').textContent = 'Hat Sayısı';
+            document.querySelector('#ortalamaSure').parentElement.querySelector('p').textContent = 'Ortalama Süre';
+            document.querySelector('#basariOrani').parentElement.querySelector('p').textContent = 'Hat Başına Ort.';
+
+            document.getElementById('toplamSefer').textContent = toplamYolcu;
+            document.getElementById('tamamlananSefer').textContent = benzersizHatlar;
+            document.getElementById('ortalamaSure').textContent = ortalamaSure + ' dk';
+            document.getElementById('basariOrani').textContent = hatBasinaOrtalama + ' yolcu/hat';
+        }
+
+        function updateDefaultStats(data) {
+            const toplamSefer = data.reduce((sum, row) => sum + row.toplamSefer, 0);
+            const tamamlanan = data.reduce((sum, row) => sum + row.tamamlanan, 0);
+            const ortalamaSure = data.length > 0 ? Math.round(data.reduce((sum, row) => sum + row.ortalamaSure, 0) / data.length) : 0;
+            const basariOrani = toplamSefer > 0 ? Math.round((tamamlanan / toplamSefer) * 100) : 0;
+
+            // Başlıkları güncelle
+            document.querySelector('#toplamSefer').parentElement.querySelector('p').textContent = 'Toplam Sefer';
+            document.querySelector('#tamamlananSefer').parentElement.querySelector('p').textContent = 'Tamamlanan Sefer';
+            document.querySelector('#ortalamaSure').parentElement.querySelector('p').textContent = 'Ortalama Süre';
+            document.querySelector('#basariOrani').parentElement.querySelector('p').textContent = 'Başarı Oranı';
+
+            document.getElementById('toplamSefer').textContent = toplamSefer;
+            document.getElementById('tamamlananSefer').textContent = tamamlanan;
+            document.getElementById('ortalamaSure').textContent = ortalamaSure + ' dk';
+            document.getElementById('basariOrani').textContent = basariOrani + '%';
+        }
+
+        // Rapor türü seçimi
+        async function selectReportType(reportType) {
+            currentReportType = reportType;
+            
+            // Tüm rapor türü kartlarından seçili sınıfını kaldır
+            document.querySelectorAll('[id^="report-"]').forEach(card => {
+                card.classList.remove('border-blue-500', 'bg-blue-50');
+                card.classList.add('border-gray-200');
+            });
+            
+            // Seçili kartı vurgula
+            const selectedCard = document.getElementById(`report-${reportType}`);
+            selectedCard.classList.remove('border-gray-200');
+            selectedCard.classList.add('border-blue-500', 'bg-blue-50');
+            
+            // Filtreleri göster/gizle
+            showHideFilters(reportType);
+            
+            // Uygun veriyi yükle
+            await loadReportData(reportType);
+            
+            // Tüm rapor türleri için otomatik olarak rapor oluştur
+            await generateReport();
+        }
+
+        // Filtreleri göster/gizle
+        function showHideFilters(reportType) {
+            const hatFilterDiv = document.getElementById('hatFilterDiv');
+            const soforFilterDiv = document.getElementById('soforFilterDiv');
+            const hat1FilterDiv = document.getElementById('hat1FilterDiv');
+            const hat2FilterDiv = document.getElementById('hat2FilterDiv');
+            
+            // Tüm özel filtreleri gizle
+            hatFilterDiv.classList.add('hidden');
+            soforFilterDiv.classList.add('hidden');
+            hat1FilterDiv.classList.add('hidden');
+            hat2FilterDiv.classList.add('hidden');
+            
+            if (reportType === 'driver-monthly') {
+                soforFilterDiv.classList.remove('hidden');
+            } else if (reportType === 'route-comparison') {
+                hat1FilterDiv.classList.remove('hidden');
+                hat2FilterDiv.classList.remove('hidden');
+            } else {
+                hatFilterDiv.classList.remove('hidden');
+            }
+        }
+
+        // Rapor verilerini yükle
+        async function loadReportData(reportType) {
+            try {
+                switch(reportType) {
+                    case 'daily-summary':
+                        await loadDailySummaryData();
+                        break;
+                    case 'driver-monthly':
+                        await loadDriverMonthlyData();
+                        break;
+                    case 'route-comparison':
+                        await loadRouteComparisonData();
+                        break;
+                    default:
+                        await loadDemoReportData();
+                }
+            } catch (error) {
+                console.error('Rapor verileri yüklenirken hata:', error);
+                showNotification('Rapor verileri yüklenirken hata oluştu!', 'error');
+            }
+        }
+
+        // Günlük özet verisi
+        async function loadDailySummaryData() {
+            try {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                const hatFilter = document.getElementById('hatFilter').value;
+                
+                let url = '/api/raporlar/gunluk-ozet?';
+                const params = new URLSearchParams();
+                
+                if (startDate) params.append('baslangic', startDate);
+                if (endDate) params.append('bitis', endDate);
+                if (hatFilter) params.append('hatId', hatFilter);
+                
+                url += params.toString();
+                
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`API çağrısı başarısız: ${response.status}`);
+                }
+                
+                reportData = await response.json();
+            } catch (error) {
+                console.error('Günlük özet verisi yükleme hatası:', error);
+                showNotification('Günlük özet verileri yüklenemedi', 'error');
+                reportData = [];
+            }
+        }
+
+        // Şoför bazlı aylık veri
+        async function loadDriverMonthlyData() {
+            try {
+                const driverFilter = document.getElementById('soforFilter').value;
+                
+                let url = '/api/raporlar/sofor-aylik?';
+                const params = new URLSearchParams();
+                
+                if (driverFilter) params.append('soforId', driverFilter);
+                
+                url += params.toString();
+                
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`API çağrısı başarısız: ${response.status}`);
+                }
+                
+                reportData = await response.json();
+            } catch (error) {
+                console.error('Şoför aylık verisi yükleme hatası:', error);
+                showNotification('Şoför aylık verileri yüklenemedi', 'error');
+                reportData = [];
+            }
+        }
+
+        // Hat karşılaştırması verisi
+        async function loadRouteComparisonData() {
+            try {
+                const route1Filter = document.getElementById('route1Filter').value;
+                const route2Filter = document.getElementById('route2Filter').value;
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                
+                if (!route1Filter || !route2Filter) {
+                    reportData = [];
+                    return;
+                }
+                
+                let url = '/api/raporlar/hat-karsilastirma?';
+                const params = new URLSearchParams();
+                
+                params.append('hat1Id', route1Filter);
+                params.append('hat2Id', route2Filter);
+                if (startDate) params.append('baslangic', startDate);
+                if (endDate) params.append('bitis', endDate);
+                
+                url += params.toString();
+                
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`API çağrısı başarısız: ${response.status}`);
+                }
+                
+                reportData = await response.json();
+            } catch (error) {
+                 console.error('Hat karşılaştırması verisi yükleme hatası:', error);
+                 showNotification('Hat karşılaştırması verileri yüklenemedi', 'error');
+                 reportData = [];
+             }
+        }
+
+
+        
+        // Bildirim gösterme fonksiyonu
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+            
+            if (type === 'success') {
+                notification.className += ' bg-green-500 text-white';
+            } else if (type === 'error') {
+                notification.className += ' bg-red-500 text-white';
+            } else if (type === 'warning') {
+                notification.className += ' bg-yellow-500 text-white';
+            } else {
+                notification.className += ' bg-blue-500 text-white';
+            }
+            
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-triangle' : 'info'} mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animasyon ile göster
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // 3 saniye sonra gizle
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Günlük sefer grafiği (smooth animasyonlu)
+        function createDailyTripsChart(data) {
+            const ctx = document.getElementById('dailyTripsChart').getContext('2d');
+            
+            // Tarihe göre grupla
+            const dailyData = {};
+            data.forEach(row => {
+                if (!dailyData[row.tarih]) {
+                    dailyData[row.tarih] = { toplam: 0, tamamlanan: 0 };
+                }
+                dailyData[row.tarih].toplam += row.toplamSefer;
+                dailyData[row.tarih].tamamlanan += row.tamamlanan;
+            });
+
+            const labels = Object.keys(dailyData).sort();
+            const toplamValues = labels.map(date => dailyData[date].toplam);
+            const tamamlananValues = labels.map(date => dailyData[date].tamamlanan);
+
+            if (dailyChart) {
+                dailyChart.destroy();
+            }
+
+            dailyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Toplam Sefer',
+                        data: toplamValues,
+                        borderColor: '#0ea5e9',
+                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                        borderWidth: 3,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#0ea5e9',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Tamamlanan',
+                        data: tamamlananValues,
+                        borderColor: '#22c55e',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        borderWidth: 3,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#22c55e',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: '#0ea5e9',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#6b7280'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#6b7280'
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+        }
+
+        // Günlük yolcu istatistikleri grafiği
+        async function createDailyPassengerChart(data) {
+            const ctx = document.getElementById('dailyPassengerChart').getContext('2d');
+            
+            let labels, passengerData;
+            
+            try {
+                // API'den günlük özet verilerini çek
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                
+                let url = '/api/raporlar/gunluk-ozet?';
+                const params = new URLSearchParams();
+                
+                if (startDate) params.append('baslangic', startDate);
+                if (endDate) params.append('bitis', endDate);
+                
+                url += params.toString();
+                
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Günlük özet verileri alınamadı');
+                }
+                
+                const dailyData = await response.json();
+                
+                // Tarihe göre sırala
+                dailyData.sort((a, b) => new Date(a.tarih) - new Date(b.tarih));
+                
+                labels = dailyData.map(item => {
+                    const date = new Date(item.tarih);
+                    return date.toLocaleDateString('tr-TR', { month: 'short', day: 'numeric' });
+                });
+                passengerData = dailyData.map(item => item.toplamYolcu || 0);
+                
+            } catch (error) {
+                console.error('Günlük yolcu grafiği oluşturulurken hata:', error);
+                // Fallback olarak mevcut veriyi kullan
+                const dailyStats = {};
+                data.forEach(row => {
+                    if (!dailyStats[row.tarih]) {
+                        dailyStats[row.tarih] = { yolcu: 0, sefer: 0 };
+                    }
+                    dailyStats[row.tarih].yolcu += row.toplamYolcu || 0;
+                    dailyStats[row.tarih].sefer += row.toplamSefer || 0;
+                });
+                
+                labels = Object.keys(dailyStats).sort().map(date => {
+                    const d = new Date(date);
+                    return d.toLocaleDateString('tr-TR', { month: 'short', day: 'numeric' });
+                });
+                passengerData = Object.keys(dailyStats).sort().map(date => dailyStats[date].yolcu);
+            }
+
+            if (passengerChart) {
+                passengerChart.destroy();
+            }
+
+            passengerChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Günlük Yolcu Sayısı',
+                        data: passengerData,
+                        borderColor: '#0ea5e9',
+                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#0ea5e9',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Yolcu Sayısı'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: '#0ea5e9',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: true,
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 0) {
+                                        return 'Yolcu: ' + context.parsed.y.toLocaleString('tr-TR');
+                                    } else {
+                                        return 'Sefer: ' + context.parsed.y + ' adet';
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeInOutQuart'
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        }
+
+        // Rapor oluştur
+        async function generateReport() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            let filteredData = reportData;
+
+            // Rapor türüne göre filtreleme
+            if (currentReportType === 'daily-summary') {
+                if (startDate) {
+                    filteredData = filteredData.filter(row => row.tarih >= startDate);
+                }
+                if (endDate) {
+                    filteredData = filteredData.filter(row => row.tarih <= endDate);
+                }
+            } else if (currentReportType === 'driver-monthly') {
+                const driverFilter = document.getElementById('soforFilter').value;
+                if (driverFilter) {
+                    filteredData = filteredData.filter(row => row.sofor === driverFilter);
+                }
+                // Şoför bazlı rapor için tarih filtreleme
+                if (startDate) {
+                    const startYear = new Date(startDate).getFullYear();
+                    filteredData = filteredData.filter(row => row.yil >= startYear);
+                }
+                if (endDate) {
+                    const endYear = new Date(endDate).getFullYear();
+                    filteredData = filteredData.filter(row => row.yil <= endYear);
+                }
+            } else if (currentReportType === 'route-comparison') {
+                const route1Filter = document.getElementById('route1Filter').value;
+                const route2Filter = document.getElementById('route2Filter').value;
+                if (route1Filter && route2Filter) {
+                    filteredData = filteredData.filter(row => row.hat === route1Filter || row.hat === route2Filter);
+                }
+            } else {
+                // Varsayılan rapor türü için mevcut filtreleme
+                const hatFilter = document.getElementById('hatFilter').value;
+                if (startDate) {
+                    filteredData = filteredData.filter(row => row.tarih >= startDate);
+                }
+                if (endDate) {
+                    filteredData = filteredData.filter(row => row.tarih <= endDate);
+                }
+                if (hatFilter) {
+                    filteredData = filteredData.filter(row => row.hat === hatFilter);
+                }
+            }
+
+            renderReportTable(filteredData);
+            updateStats(filteredData);
+            
+            // Şoför bazlı rapor için grafikleri gizle
+            if (currentReportType === 'driver-monthly') {
+                document.getElementById('chartsSection').style.visibility = 'hidden';
+                document.getElementById('chartsSection').style.height = '0';
+                document.getElementById('chartsSection').style.marginBottom = '0';
+            } else {
+                document.getElementById('chartsSection').style.visibility = 'visible';
+                document.getElementById('chartsSection').style.height = 'auto';
+                document.getElementById('chartsSection').style.marginBottom = '';
+                createDailyTripsChart(filteredData);
+                await createDailyPassengerChart(filteredData);
+            }
+        }
+
+        // Rapor dışa aktar
+        function exportReport(format) {
+            let filteredData = reportData;
+
+            // Rapor türüne göre filtreleme
+            if (currentReportType === 'daily-summary') {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                if (startDate) {
+                    filteredData = filteredData.filter(row => row.tarih >= startDate);
+                }
+                if (endDate) {
+                    filteredData = filteredData.filter(row => row.tarih <= endDate);
+                }
+            } else if (currentReportType === 'driver-monthly') {
+                const driverFilter = document.getElementById('soforFilter').value;
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                if (driverFilter) {
+                    filteredData = filteredData.filter(row => row.sofor === driverFilter);
+                }
+                // Şoför bazlı rapor için tarih filtreleme
+                if (startDate) {
+                    const startYear = new Date(startDate).getFullYear();
+                    filteredData = filteredData.filter(row => row.yil >= startYear);
+                }
+                if (endDate) {
+                    const endYear = new Date(endDate).getFullYear();
+                    filteredData = filteredData.filter(row => row.yil <= endYear);
+                }
+            } else if (currentReportType === 'route-comparison') {
+                const route1Filter = document.getElementById('route1Filter').value;
+                const route2Filter = document.getElementById('route2Filter').value;
+                if (route1Filter && route2Filter) {
+                    filteredData = filteredData.filter(row => row.hat === route1Filter || row.hat === route2Filter);
+                }
+            } else {
+                // Varsayılan rapor türü için filtreleme
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                const hatFilter = document.getElementById('hatFilter').value;
+                if (startDate) {
+                    filteredData = filteredData.filter(row => row.tarih >= startDate);
+                }
+                if (endDate) {
+                    filteredData = filteredData.filter(row => row.tarih <= endDate);
+                }
+                if (hatFilter) {
+                    filteredData = filteredData.filter(row => row.hat === hatFilter);
+                }
+            }
+
+            if (format === 'pdf') {
+                exportToPDF(filteredData);
+            } else if (format === 'excel') {
+                exportToExcel(filteredData);
+            }
+        }
+
+        // PDF'e aktar
+        function exportToPDF(data) {
+            let content = '';
+            
+            if (currentReportType === 'driver-monthly') {
+                // Şoför bazlı rapor için özel PDF içeriği
+                content = `
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Şoför Bazlı Rapor</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            h1 { color: #0ea5e9; text-align: center; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                            th { background-color: #f2f2f2; }
+                            .stats { display: flex; justify-content: space-around; margin: 20px 0; }
+                            .stat-box { text-align: center; padding: 10px; border: 1px solid #ddd; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>İETT Şoför Bazlı Rapor</h1>
+                        <p><strong>Rapor Tarihi:</strong> ${new Date().toLocaleDateString('tr-TR')}</p>
+                        
+                        <div class="stats">
+                             <div class="stat-box">
+                                 <h3>Toplam Sefer</h3>
+                                 <p>${data.reduce((sum, row) => sum + (row.seferSayisi || 0), 0)}</p>
+                             </div>
+                             <div class="stat-box">
+                                 <h3>Ortalama Süre</h3>
+                                 <p>${data.length > 0 ? Math.round(data.reduce((sum, row) => sum + Math.abs(row.ortalamaSure || 0), 0) / data.length) : 0} dk</p>
+                             </div>
+                             <div class="stat-box">
+                                  <h3>Toplam Şoför</h3>
+                                  <p>${new Set(data.map(row => row.sofor)).size}</p>
+                              </div>
+                         </div>
+                        
+                        <table>
+                             <thead>
+                                 <tr>
+                                     <th>Şoför</th>
+                                     <th>Yıl</th>
+                                     <th>Ay</th>
+                                     <th>Sefer Sayısı</th>
+                                     <th>Ortalama Süre</th>
+                                 </tr>
+                             </thead>
+                             <tbody>
+                 `;
+                 
+                 data.forEach(row => {
+                     const sofor = row.sofor || 'N/A';
+                     const yil = row.yil || 'N/A';
+                     const ay = row.ay ? getMonthName(row.ay) : 'N/A';
+                     const seferSayisi = row.seferSayisi || 0;
+                     const ortalamaSure = row.ortalamaSure ? Math.round(Math.abs(row.ortalamaSure)) : 0;
+                     
+                     content += `
+                         <tr>
+                             <td>${sofor}</td>
+                             <td>${yil}</td>
+                             <td>${ay}</td>
+                             <td>${seferSayisi}</td>
+                             <td>${ortalamaSure} dk</td>
+                         </tr>
+                     `;
+                 });
+                
+                content += `
+                            </tbody>
+                        </table>
+                    </body>
+                    </html>
+                `;
+            } else {
+                // Varsayılan rapor için PDF içeriği
+                content = `
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Sefer Raporu</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            h1 { color: #0ea5e9; text-align: center; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                            th { background-color: #f2f2f2; }
+                            .stats { display: flex; justify-content: space-around; margin: 20px 0; }
+                            .stat-box { text-align: center; padding: 10px; border: 1px solid #ddd; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>İETT Sefer Raporu</h1>
+                        <p><strong>Rapor Tarihi:</strong> ${new Date().toLocaleDateString('tr-TR')}</p>
+                        
+                        <div class="stats">
+                            <div class="stat-box">
+                                <h3>Toplam Sefer</h3>
+                                <p>${data.reduce((sum, row) => sum + (row.toplamSefer || 0), 0)}</p>
+                            </div>
+                            <div class="stat-box">
+                                <h3>Tamamlanan</h3>
+                                <p>${data.reduce((sum, row) => sum + (row.tamamlanan || 0), 0)}</p>
+                            </div>
+                            <div class="stat-box">
+                                 <h3>İptal Edilen</h3>
+                                 <p>${data.reduce((sum, row) => sum + (row.iptal || 0), 0)}</p>
+                             </div>
+                        </div>
+                        
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>Hat</th>
+                                    <th>Toplam Sefer</th>
+                                    <th>Tamamlanan</th>
+                                    <th>İptal Edilen</th>
+                                    <th>Başarı Oranı</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                data.forEach(row => {
+                    const toplamSefer = row.toplamSefer || 0;
+                    const tamamlanan = row.tamamlanan || 0;
+                    const iptal = row.iptal || 0;
+                    const successRate = toplamSefer > 0 ? Math.round((tamamlanan / toplamSefer) * 100) : 0;
+                    const tarih = row.tarih || 'N/A';
+                    const hat = row.hat || 'N/A';
+                    
+                    content += `
+                        <tr>
+                            <td>${tarih}</td>
+                            <td>${hat}</td>
+                            <td>${toplamSefer}</td>
+                            <td>${tamamlanan}</td>
+                            <td>${iptal}</td>
+                            <td>%${successRate}</td>
+                        </tr>
+                    `;
+                });
+                
+                content += `
+                            </tbody>
+                        </table>
+                    </body>
+                    </html>
+                `;
+            }
+            
+            // Yeni pencerede aç ve yazdır
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(content);
+            printWindow.document.close();
+            printWindow.focus();
+            
+            // Yazdırma diyaloğunu aç
+            setTimeout(() => {
+                printWindow.print();
+            }, 500);
+        }
+
+        // Excel'e aktar
+        function exportToExcel(data) {
+            // CSV formatında veri hazırla
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Tarih,Hat,Toplam Sefer,Tamamlanan,İptal Edilen,Başarı Oranı\n";
+             
+             data.forEach(row => {
+                 const successRate = Math.round((row.tamamlanan / row.toplamSefer) * 100);
+                 csvContent += `${row.tarih},${row.hat},${row.toplamSefer},${row.tamamlanan},${row.iptal},%${successRate}\n`;
+             });
+            
+            // Dosyayı indir
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `sefer_raporu_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Initialize page
+        window.addEventListener('load', async () => {
+            if (checkSession()) {
+                loadUserData();
+                await loadDemoReportData();
+                
+                // Leave date filters empty by default to show all data
+                document.getElementById('endDate').value = '';
+                document.getElementById('startDate').value = '';
+                
+                // Generate initial report with all data
+                await generateReport();
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            
+            if (!dropdown.contains(event.target)) {
+                dropdownMenu.classList.add('hidden');
+                document.getElementById('dropdownIcon').classList.remove('rotate-180');
+            }
+        });
+
+        // Şoför listesini yükle
+        async function loadDrivers() {
+            try {
+                const response = await fetch('/api/kullanicilar');
+                if (!response.ok) {
+                    throw new Error(`API çağrısı başarısız: ${response.status}`);
+                }
+                
+                const users = await response.json();
+                const drivers = users.filter(user => user.role === 'sofor');
+                
+                const soforSelect = document.getElementById('soforFilter');
+                soforSelect.innerHTML = '<option value="">Şoför Seçin</option>';
+                
+                drivers.forEach(driver => {
+                    const option = document.createElement('option');
+                    option.value = driver.id;
+                    option.textContent = driver.name;
+                    soforSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Şoför listesi yükleme hatası:', error);
+            }
+        }
+
+        // Sayfa yüklendiğinde varsayılan rapor türünü başlat
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadDrivers();
+            await selectReportType('daily-summary');
+        });
+    </script>
+</body>
+</html>

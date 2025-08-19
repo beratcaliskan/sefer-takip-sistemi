@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İstatistik - İETT Şoför Paneli</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'soft-blue': '#e0f2fe',
+                        'soft-green': '#f0fdf4',
+                        'soft-purple': '#faf5ff',
+                        'soft-gray': '#f8fafc',
+                        'accent-blue': '#0ea5e9',
+                        'accent-green': '#22c55e',
+                        'accent-purple': '#a855f7'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-soft-gray to-soft-blue min-h-screen">
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-accent-blue p-2 rounded-lg">
+                        <i class="fas fa-bus text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">İETT</h1>
+                        <p class="text-xs text-gray-500">Sefer Takip Sistemi</p>
+                    </div>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="/sofor-dashboard" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Ana Sayfa</a>
+                    <a href="/vardiya-plani" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Vardiya Planı</a>
+                    <a href="/istatistik" class="text-accent-blue font-medium border-b-2 border-accent-blue pb-1">İstatistik</a>
+                </nav>
+                
+                <!-- User Info Dropdown -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative" id="userDropdown">
+                        <button class="flex items-center space-x-3 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 transition-all shadow-sm" onclick="toggleUserDropdown()">
+                            <div class="w-8 h-8 bg-gradient-to-r from-accent-blue to-blue-600 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white text-sm"></i>
+                            </div>
+                            <div class="hidden sm:block text-left">
+                                <div class="text-sm font-semibold text-gray-800" id="headerUserName">Şoför</div>
+                                <div class="text-xs text-gray-500" id="headerUserRole">Şoför</div>
+                            </div>
+                            <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" id="dropdownIcon"></i>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 hidden" id="dropdownMenu">
+                            <div class="px-4 py-3 border-b border-gray-100">
+                                <div class="text-sm font-semibold text-gray-800" id="dropdownUserName">Şoför</div>
+                                <div class="text-xs text-gray-500" id="dropdownUserEmail">sofor@iett.gov.tr</div>
+                                <div class="text-xs text-accent-blue font-medium mt-1">Şoför</div>
+                            </div>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-user-circle mr-3 text-gray-400"></i>
+                                Profil Ayarları
+                            </a>
+                            <div class="border-t border-gray-100 mt-2 pt-2">
+                                <button class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors" onclick="logout()">
+                                    <i class="fas fa-sign-out-alt mr-3 text-red-500"></i>
+                                    Çıkış Yap
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">İstatistiklerim</h2>
+            <p class="text-gray-600">Çalışma performansınızı ve istatistiklerinizi görüntüleyin.</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Toplam Çalışma Günü -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-calendar-check text-blue-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Toplam Çalışma Günü</p>
+                        <p class="text-2xl font-bold text-gray-900" id="totalWorkDays">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toplam Sefer Sayısı -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-route text-green-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Toplam Sefer Sayısı</p>
+                        <p class="text-2xl font-bold text-gray-900" id="totalTrips">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toplam Çalışma Saati -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-clock text-purple-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Toplam Çalışma Saati</p>
+                        <p class="text-2xl font-bold text-gray-900" id="totalHours">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ortalama Günlük Sefer -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-chart-line text-orange-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Ortalama Günlük Sefer</p>
+                        <p class="text-2xl font-bold text-gray-900" id="avgDailyTrips">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Aylık Sefer Grafiği -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Aylık Sefer Sayısı</h3>
+                <div class="h-64 relative">
+                    <canvas id="monthlyTripsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Haftalık Çalışma Saatleri -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Haftalık Çalışma Saatleri</h3>
+                    <div class="relative">
+                        <select id="monthSelector" class="bg-white border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="current">Bu Ay</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="h-64 relative">
+                    <canvas id="weeklyHoursChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Stats Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900">Detaylı İstatistikler</h3>
+                <div class="flex space-x-2">
+                    <select id="monthFilter" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                        <option value="">Tüm Aylar</option>
+                        <option value="1">Ocak</option>
+                        <option value="2">Şubat</option>
+                        <option value="3">Mart</option>
+                        <option value="4">Nisan</option>
+                        <option value="5">Mayıs</option>
+                        <option value="6">Haziran</option>
+                        <option value="7">Temmuz</option>
+                        <option value="8">Ağustos</option>
+                        <option value="9">Eylül</option>
+                        <option value="10">Ekim</option>
+                        <option value="11">Kasım</option>
+                        <option value="12">Aralık</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tarih</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gün</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hat</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sefer Sayısı</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Çalışma Saati</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Table rows will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let monthlyChart = null;
+        let weeklyChart = null;
+
+        // Session kontrolü
+        function checkSession() {
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            const userRole = sessionStorage.getItem('userRole');
+            
+            if (!isLoggedIn || isLoggedIn !== 'true') {
+                window.location.href = '/login';
+                return false;
+            }
+            
+            // Şoför olmayan kullanıcıları ana dashboard'a yönlendir
+            if (userRole !== 'sofor') {
+                window.location.href = '/dashboard';
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Kullanıcı verilerini yükle
+        function loadUserData() {
+            const userName = sessionStorage.getItem('userName') || 'Şoför';
+            const userEmail = sessionStorage.getItem('userEmail') || 'sofor@iett.gov.tr';
+            
+            document.getElementById('headerUserName').textContent = userName;
+            document.getElementById('dropdownUserName').textContent = userName;
+            document.getElementById('dropdownUserEmail').textContent = userEmail;
+        }
+
+        // Dropdown toggle
+        function toggleUserDropdown() {
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            const icon = document.getElementById('dropdownIcon');
+            
+            dropdownMenu.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
+
+        // Logout
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = '/login';
+        }
+
+        // Mock data for statistics
+        // Mock data removed - now using real API data only
+
+        // Show loading indicator
+        function showLoading() {
+            const loadingHTML = `
+                <div id="loadingIndicator" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+                    <div class="bg-white rounded-lg p-6 flex items-center space-x-3">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <span class="text-gray-700 font-medium">İstatistikler yükleniyor...</span>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', loadingHTML);
+        }
+
+        // Hide loading indicator
+        function hideLoading() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (loadingIndicator) {
+                loadingIndicator.remove();
+            }
+        }
+
+        // Load statistics
+        async function loadStatistics() {
+            showLoading();
+            try {
+                // Get user data from sessionStorage
+                const userId = sessionStorage.getItem('userId');
+                const userRole = sessionStorage.getItem('userRole');
+                
+                if (!userId) {
+                    throw new Error('Kullanıcı bilgileri bulunamadı. Lütfen tekrar giriş yapın.');
+                }
+
+                // Only allow drivers to access this page
+                if (userRole !== 'sofor') {
+                    throw new Error('Bu sayfaya sadece şoförler erişebilir.');
+                }
+
+                const response = await fetch(`/api/raporlar/sofor-istatistik/${userId}`);
+                if (!response.ok) {
+                    throw new Error('İstatistik verileri alınamadı');
+                }
+
+                const data = await response.json();
+                
+                // Update stat cards with real data
+                document.getElementById('totalWorkDays').textContent = data.istatistikler?.toplamCalisilanGun || 0;
+                document.getElementById('totalTrips').textContent = data.istatistikler?.toplamSeferSayisi || 0;
+                document.getElementById('totalHours').textContent = (Math.round(data.istatistikler?.toplamCalismaSaati || 0)) + ' saat';
+                document.getElementById('avgDailyTrips').textContent = Math.round(data.istatistikler?.ortalamaSeferSuresi || 0) + ' dk';
+
+                // Store data globally for charts
+                window.statsData = data;
+
+                // Create charts with real data
+                createMonthlyChart('Aylık Seferler');
+                createWeeklyChart(null, 'Bu Ay');
+                
+                // Load detailed stats table with real data
+                loadDetailedStats();
+                
+                // Populate month selector dropdown
+                populateMonthSelector();
+                
+                hideLoading();
+            } catch (error) {
+                console.error('İstatistik yükleme hatası:', error);
+                hideLoading();
+                
+                // Show error message to user
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50';
+                errorDiv.innerHTML = `
+                    <strong>Hata:</strong> ${error.message}
+                    <button onclick="this.parentElement.remove()" class="ml-2 text-red-700 hover:text-red-900">×</button>
+                `;
+                document.body.appendChild(errorDiv);
+                
+                // Redirect to login if user data is missing
+                if (error.message.includes('Kullanıcı bilgileri')) {
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                }
+            }
+        }
+
+        // Removed mock data fallback - using real API data only
+
+        // Create monthly trips chart
+        function createMonthlyChart(title = 'Aylık Seferler') {
+            const ctx = document.getElementById('monthlyTripsChart').getContext('2d');
+            
+            if (monthlyChart) {
+                monthlyChart.destroy();
+            }
+            
+            // Use real data from API
+            const data = window.statsData;
+            if (!data || !data.aylikSeferler) {
+                console.warn('Aylık sefer verileri bulunamadı');
+                return;
+            }
+            
+            const monthlyData = data.aylikSeferler;
+            const labels = monthlyData.map(item => {
+                const monthNames = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+                return `${monthNames[item.ay - 1]} ${item.yil}`;
+            });
+            const chartData = monthlyData.map(item => item.seferSayisi);
+            
+            monthlyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Sefer Sayısı',
+                        data: chartData,
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: title,
+                            font: {
+                                size: 14
+                            },
+                            color: '#6B7280'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                stepSize: 1
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Create weekly hours chart
+        function createWeeklyChart(customData = null, title = 'Bu Ay') {
+            const ctx = document.getElementById('weeklyHoursChart').getContext('2d');
+            
+            if (weeklyChart) {
+                weeklyChart.destroy();
+            }
+            
+            // Use custom data if provided, otherwise use current month data
+            let weeklyData;
+            if (customData) {
+                weeklyData = customData;
+            } else {
+                const data = window.statsData;
+                if (!data || !data.haftalikSaatler) {
+                    console.warn('Haftalık çalışma saati verileri bulunamadı');
+                    return;
+                }
+                weeklyData = data.haftalikSaatler;
+            }
+            
+            const labels = weeklyData.map(item => `Hafta ${item.hafta}`);
+            const chartData = weeklyData.map(item => item.saat); // Already rounded in API
+            
+            weeklyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Çalışma Saati',
+                        data: chartData,
+                        backgroundColor: '#10B981',
+                        borderColor: '#059669',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load detailed statistics table
+        function loadDetailedStats(monthFilter = '') {
+            const tbody = document.getElementById('statsTableBody');
+            
+            // Use real data from API
+            const data = window.statsData;
+            if (!data || !data.detayliIstatistikler) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Detaylı istatistik verileri bulunamadı</td></tr>';
+                return;
+            }
+            
+            let detailedData = data.detayliIstatistikler;
+            
+            // Apply month filter if provided
+            if (monthFilter) {
+                detailedData = data.detayliIstatistikler.filter(stat => {
+                    const statDate = new Date(stat.tarih);
+                    return statDate.getMonth() + 1 === parseInt(monthFilter);
+                });
+            }
+            
+            if (!detailedData || detailedData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Seçilen dönem için veri bulunamadı</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = detailedData.map(stat => {
+                // Format date for display
+                const date = new Date(stat.tarih);
+                const formattedDate = date.toLocaleDateString('tr-TR');
+                
+                // Get day name in Turkish
+                const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+                const dayName = dayNames[date.getDay()];
+                
+                // Format working hours
+                const workingHours = Math.round(stat.calismaSaati * 10) / 10;
+                
+                // Status styling
+                const statusClass = stat.durum === 'tamamlandi' ? 'text-green-600 bg-green-100' : 
+                                  stat.durum === 'aktif' ? 'text-blue-600 bg-blue-100' : 
+                                  stat.durum === 'planli' ? 'text-yellow-600 bg-yellow-100' :
+                                  stat.durum === 'iptal' ? 'text-red-600 bg-red-100' :
+                                  'text-gray-600 bg-gray-100';
+                
+                // Status display text
+                const statusText = stat.durum === 'tamamlandi' ? 'Tamamlandı' :
+                                 stat.durum === 'aktif' ? 'Aktif' :
+                                 stat.durum === 'planli' ? 'Planlı' :
+                                 stat.durum === 'iptal' ? 'İptal' :
+                                 stat.durum;
+                
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${stat.tarih}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${stat.gun}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${stat.vardiya || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${stat.seferSayisi}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${stat.calismaSaati}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
+                                ${statusText}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Month filter change handler
+        document.getElementById('monthFilter').addEventListener('change', function() {
+            loadDetailedStats(this.value);
+        });
+
+        // Populate month selector dropdown with past 6 months
+        function populateMonthSelector() {
+            const monthSelector = document.getElementById('monthSelector');
+            const currentDate = new Date();
+            
+            // Add past 5 months (excluding current month which is already there)
+            for (let i = 1; i <= 5; i++) {
+                const pastDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+                const year = pastDate.getFullYear();
+                const month = pastDate.getMonth() + 1;
+                const monthName = getMonthName(month);
+                
+                const option = document.createElement('option');
+                option.value = `${year}-${month}`;
+                option.textContent = `${monthName} ${year}`;
+                monthSelector.appendChild(option);
+            }
+        }
+
+        // Handle month selector change
+        document.addEventListener('DOMContentLoaded', function() {
+            const monthSelector = document.getElementById('monthSelector');
+            if (monthSelector) {
+                monthSelector.addEventListener('change', function() {
+                    if (this.value === 'current') {
+                        // Use current month data (already loaded)
+                        createWeeklyChart(null, 'Bu Ay');
+                    } else {
+                        // Load historical data
+                        const [year, month] = this.value.split('-');
+                        loadHistoricalWeeklyData(parseInt(year), parseInt(month));
+                    }
+                });
+            }
+        });
+
+        // Load historical weekly data for selected month
+        async function loadHistoricalWeeklyData(year, month) {
+            try {
+                const userId = sessionStorage.getItem('userId');
+                const response = await fetch(`/api/raporlar/sofor-istatistik/${userId}/${year}/${month}`);
+                
+                if (!response.ok) {
+                    throw new Error('Geçmiş ay verileri alınamadı');
+                }
+                
+                const data = await response.json();
+                createWeeklyChart(data.haftalikSaatler, `${data.ayAdi} ${data.yil}`);
+            } catch (error) {
+                console.error('Geçmiş veri yükleme hatası:', error);
+                alert('Geçmiş ay verileri yüklenirken hata oluştu.');
+            }
+        }
+
+        // Get month name in Turkish
+        function getMonthName(month) {
+            const months = [
+                'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+                'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+            ];
+            return months[month - 1];
+        }
+
+        // Initialize page
+        window.addEventListener('load', () => {
+            if (checkSession()) {
+                loadUserData();
+                loadStatistics();
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            
+            if (!dropdown.contains(event.target)) {
+                dropdownMenu.classList.add('hidden');
+                document.getElementById('dropdownIcon').classList.remove('rotate-180');
+            }
+        });
+    </script>
+</body>
+</html>

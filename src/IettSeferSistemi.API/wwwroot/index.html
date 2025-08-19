@@ -39,15 +39,61 @@
                     </div>
                 </div>
                 <nav class="hidden md:flex space-x-8">
-                    <a href="#" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Anasayfa</a>
-                    <a href="#" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Seferler</a>
-                    <a href="#" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Hatlar</a>
-                    <a href="#" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Raporlar</a>
+                    <a href="/" class="text-accent-blue font-medium border-b-2 border-accent-blue pb-1">Anasayfa</a>
+                    <a href="/seferler" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Seferler</a>
+                    <a href="/hatlar" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Hatlar</a>
+                    <a href="/users" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Kullanıcılar</a>
+                    <a href="/raporlar" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Raporlar</a>
                     <a href="/swagger" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">API</a>
                 </nav>
-                <button class="md:hidden p-2 rounded-lg hover:bg-gray-100">
-                    <i class="fas fa-bars text-gray-600"></i>
-                </button>
+                
+                <!-- User Info Dropdown -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative" id="userDropdown">
+                        <button class="flex items-center space-x-3 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 transition-all shadow-sm" onclick="toggleUserDropdown()">
+                            <div class="w-8 h-8 bg-gradient-to-r from-accent-blue to-blue-600 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white text-sm"></i>
+                            </div>
+                            <div class="hidden sm:block text-left">
+                                <div class="text-sm font-semibold text-gray-800">Kullanıcı</div>
+                                <div class="text-xs text-gray-500">Kullanıcı</div>
+                            </div>
+                            <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" id="dropdownIcon"></i>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 hidden" id="dropdownMenu">
+                            <div class="px-4 py-3 border-b border-gray-100">
+                                <div class="text-sm font-semibold text-gray-800">Kullanıcı</div>
+                                <div class="text-xs text-gray-500">kullanici@iett.gov.tr</div>
+                                <div class="text-xs text-accent-blue font-medium mt-1">Kullanıcı</div>
+                            </div>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-user-circle mr-3 text-gray-400"></i>
+                                Profil Ayarları
+                            </a>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-cog mr-3 text-gray-400"></i>
+                                Hesap Ayarları
+                            </a>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-bell mr-3 text-gray-400"></i>
+                                Bildirimler
+                            </a>
+                            <div class="border-t border-gray-100 mt-2 pt-2">
+                                <button class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors" onclick="logout()">
+                                    <i class="fas fa-sign-out-alt mr-3 text-red-500"></i>
+                                    Çıkış Yap
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button class="md:hidden p-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-bars text-gray-600"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -249,6 +295,106 @@
     </footer>
 
     <script>
+        // Session control - Check if user is logged in
+        function checkSession() {
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            if (!isLoggedIn || isLoggedIn !== 'true') {
+                // Redirect to login page if not logged in
+                window.location.href = '/login';
+                return false;
+            }
+            return true;
+        }
+
+        // Load user data from session
+        function loadUserData() {
+            const userName = sessionStorage.getItem('userName') || 'Kullanıcı';
+            const userEmail = sessionStorage.getItem('userEmail') || 'kullanici@iett.gov.tr';
+            const userRole = sessionStorage.getItem('userRole') || 'user';
+            
+            // Update user name in header button
+            const headerUserName = document.querySelector('button .text-sm.font-semibold.text-gray-800');
+            if (headerUserName) {
+                headerUserName.textContent = userName;
+            }
+            
+            // Update user role in header button
+            const headerUserRole = document.querySelector('button .text-xs.text-gray-500');
+            if (headerUserRole) {
+                const roleText = getRoleDisplayText(userRole);
+                headerUserRole.textContent = roleText;
+            }
+            
+            // Update user info in dropdown menu
+            const dropdownUserName = document.querySelector('#dropdownMenu .text-sm.font-semibold.text-gray-800');
+            if (dropdownUserName) {
+                dropdownUserName.textContent = userName;
+            }
+            
+            const dropdownUserEmail = document.querySelector('#dropdownMenu .text-xs.text-gray-500:not(.text-accent-blue)');
+            if (dropdownUserEmail) {
+                dropdownUserEmail.textContent = userEmail;
+            }
+            
+            const dropdownUserRole = document.querySelector('#dropdownMenu .text-xs.text-accent-blue');
+            if (dropdownUserRole) {
+                const roleText = getRoleDisplayText(userRole);
+                dropdownUserRole.textContent = roleText;
+            }
+        }
+        
+        // Get role display text
+        function getRoleDisplayText(role) {
+            switch(role) {
+                case 'admin':
+                    return 'Sistem Yöneticisi';
+                case 'sofor':
+                    return 'Şoför';
+                case 'yonetici':
+                    return 'Yönetici';
+                default:
+                    return 'Kullanıcı';
+            }
+        }
+
+        // User Dropdown Functions
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('dropdownMenu');
+            const icon = document.getElementById('dropdownIcon');
+            
+            if (dropdown.classList.contains('hidden')) {
+                dropdown.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                dropdown.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userDropdown = document.getElementById('userDropdown');
+            const dropdown = document.getElementById('dropdownMenu');
+            const icon = document.getElementById('dropdownIcon');
+            
+            if (!userDropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        });
+        
+        // Logout function
+        function logout() {
+            // if (confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
+                // Clear session data
+                sessionStorage.clear();
+                localStorage.removeItem('rememberedUser');
+                
+                // Redirect to login page
+                window.location.href = '/login';
+            // }
+        }
+        
         // Simple animation for stats
         function animateStats() {
             const stats = [
@@ -273,9 +419,20 @@
             });
         }
         
-        // Run animation when page loads
+        // Initialize page
         window.addEventListener('load', () => {
-            setTimeout(animateStats, 500);
+            // Check session first
+            if (checkSession()) {
+                // Load user data if session is valid
+                loadUserData();
+                // Run stats animation
+                setTimeout(animateStats, 500);
+            }
+        });
+        
+        // Check session on page focus (when user returns to tab)
+        window.addEventListener('focus', function() {
+            checkSession();
         });
         
         // Smooth scrolling for anchor links

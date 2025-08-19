@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seferler - İETT Sefer Takip Sistemi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'soft-blue': '#e0f2fe',
+                        'soft-green': '#f0fdf4',
+                        'soft-purple': '#faf5ff',
+                        'soft-gray': '#f8fafc',
+                        'accent-blue': '#0ea5e9',
+                        'accent-green': '#22c55e',
+                        'accent-purple': '#a855f7'
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes dropdownSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-10px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .dropdown-portal {
+            animation: dropdownSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .dropdown-portal > div:hover {
+            transform: translateX(2px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-soft-gray to-soft-blue min-h-screen">
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-accent-blue p-2 rounded-lg">
+                        <i class="fas fa-bus text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">İETT</h1>
+                        <p class="text-xs text-gray-500">Sefer Takip Sistemi</p>
+                    </div>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="/" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Anasayfa</a>
+                    <a href="/seferler" class="text-accent-blue font-medium border-b-2 border-accent-blue pb-1">Seferler</a>
+                    <a href="/hatlar" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Hatlar</a>
+                    <a href="/users" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Kullanıcılar</a>
+                    <a href="/raporlar" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Raporlar</a>
+                    <a href="/swagger" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">API</a>
+                </nav>
+                
+                <!-- User Info Dropdown -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative" id="userDropdown">
+                        <button class="flex items-center space-x-3 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 transition-all shadow-sm" onclick="toggleUserDropdown()">
+                            <div class="w-8 h-8 bg-gradient-to-r from-accent-blue to-blue-600 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white text-sm"></i>
+                            </div>
+                            <div class="hidden sm:block text-left">
+                                <div class="text-sm font-semibold text-gray-800" id="headerUserName">Kullanıcı</div>
+                                <div class="text-xs text-gray-500" id="headerUserRole">Kullanıcı</div>
+                            </div>
+                            <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" id="dropdownIcon"></i>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 hidden" id="dropdownMenu">
+                            <div class="px-4 py-3 border-b border-gray-100">
+                                <div class="text-sm font-semibold text-gray-800" id="dropdownUserName">Kullanıcı</div>
+                                <div class="text-xs text-gray-500" id="dropdownUserEmail">kullanici@iett.gov.tr</div>
+                                <div class="text-xs text-accent-blue font-medium mt-1" id="dropdownUserRole">Kullanıcı</div>
+                            </div>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-user-circle mr-3 text-gray-400"></i>
+                                Profil Ayarları
+                            </a>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-cog mr-3 text-gray-400"></i>
+                                Hesap Ayarları
+                            </a>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-bell mr-3 text-gray-400"></i>
+                                Bildirimler
+                            </a>
+                            <div class="border-t border-gray-100 mt-2 pt-2">
+                                <button class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors" onclick="logout()">
+                                    <i class="fas fa-sign-out-alt mr-3 text-red-500"></i>
+                                    Çıkış Yap
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button class="md:hidden p-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-bars text-gray-600"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Seferler</h1>
+                    <p class="text-gray-600">Sefer planlaması ve takibi</p>
+                </div>
+                <button onclick="openSeferModal()" class="bg-accent-blue hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-sm">
+                    <i class="fas fa-plus mr-2"></i>
+                    Yeni Sefer
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Sefer ID</label>
+                    <input type="text" id="seferIdFilter" placeholder="Sefer ID ara..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent" oninput="filterSeferler()">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Hat</label>
+                    <div class="relative">
+                        <select id="hatFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent" onchange="filterSeferler()">
+                            <option value="">Tüm Hatlar</option>
+                            <option value="15">15 - Eminönü - Bağcılar</option>
+                            <option value="34">34 - Kadıköy - Mecidiyeköy</option>
+                            <option value="500T">500T - Taksim - Beylikdüzü</option>
+                        </select>
+                        <input type="text" id="hatSearch" placeholder="Hat ara..." class="hidden w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent" oninput="searchHat()">
+                        <div id="hatDropdown" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Şoför</label>
+                    <div class="relative">
+                        <select id="soforFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent" onchange="filterSeferler()">
+                            <option value="">Tüm Şoförler</option>
+                        </select>
+                        <input type="text" id="soforSearch" placeholder="Şoför ara..." class="hidden w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent" oninput="searchSofor()">
+                        <div id="soforDropdown" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Durum</label>
+                    <select id="durumFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                        <option value="">Tüm Durumlar</option>
+                        <option value="planli">Planlı</option>
+                        <option value="aktif">Aktif</option>
+                        <option value="tamamlandi">Tamamlandı</option>
+                        <option value="iptal">İptal</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tarih</label>
+                    <input type="date" id="tarihFilter" placeholder="gg.aa.yyyy" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                </div>
+                <div class="flex items-end">
+                    <button onclick="clearFilters()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-times mr-2"></i>
+                        Temizle
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seferler Table -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Sefer Listesi</h2>
+            </div>
+            <div class="overflow-x-auto" style="overflow-y: visible;">
+                <table class="min-w-full divide-y divide-gray-200" style="overflow: visible;">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Sefer No</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Hat</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Şoför</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Otobüs</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Başlangıç</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Bitiş</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Yolcu Sayısı</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Durum</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="seferlerTableBody" class="bg-white divide-y divide-gray-200" style="overflow: visible;">
+                        <!-- Sefer rows will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Sefer Modal -->
+    <div id="seferModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 id="modalTitle" class="text-lg font-semibold text-gray-900">Yeni Sefer</h3>
+                </div>
+                <form id="seferForm" class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Hat</label>
+                            <select id="seferHat" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                                <option value="">Hat Seçin</option>
+                                <option value="15">15 - Eminönü - Bağcılar</option>
+                                <option value="34">34 - Kadıköy - Mecidiyeköy</option>
+                                <option value="500T">500T - Taksim - Beylikdüzü</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Şoför</label>
+                            <select id="seferSofor" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                                <option value="">Şoför Seçin</option>
+                                <option value="1">Ahmet Yılmaz</option>
+                                <option value="2">Mehmet Demir</option>
+                                <option value="3">Ali Kaya</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Otobüs</label>
+                            <select id="seferOtobus" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                                <option value="">Otobüs Seçin</option>
+                                <option value="34-AB-123">34 AB 123</option>
+                                <option value="34-CD-456">34 CD 456</option>
+                                <option value="34-EF-789">34 EF 789</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tarih</label>
+                            <input type="date" id="seferTarih" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Başlangıç Saati</label>
+                            <input type="time" id="seferBaslangic" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Bitiş Saati</label>
+                            <input type="time" id="seferBitis" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Notlar</label>
+                        <textarea id="seferNotlar" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent" placeholder="Sefer ile ilgili notlar..."></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" onclick="closeSeferModal()" class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors">
+                            İptal
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-accent-blue hover:bg-blue-600 text-white rounded-lg font-medium transition-colors">
+                            Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yolcu Sayısı Modal -->
+    <div id="yolcuModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 id="yolcuModalTitle" class="text-lg font-semibold text-gray-900">Yolcu Sayısı Ekle</h3>
+                </div>
+                <form id="yolcuForm" class="p-6">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Sefer Bilgisi</label>
+                        <div id="yolcuSeferBilgi" class="p-3 bg-gray-50 rounded-lg text-sm text-gray-600">
+                            <!-- Sefer bilgisi buraya gelecek -->
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Yolcu Sayısı</label>
+                        <input type="number" id="yolcuSayisiInput" min="0" required 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent"
+                               placeholder="Örn: 45">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Durak (İsteğe bağlı)</label>
+                        <input type="text" id="yolcuDurak" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent"
+                               placeholder="Örn: Taksim">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Notlar (İsteğe bağlı)</label>
+                        <textarea id="yolcuNotlar" rows="2" 
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent"
+                                  placeholder="Yolcu sayısı ile ilgili notlar..."></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="closeYolcuModal()" 
+                                class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors">
+                            İptal
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors">
+                            Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        let seferler = [];
+        let editingSeferId = null;
+
+        // Session kontrolü
+        function checkSession() {
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            if (!isLoggedIn || isLoggedIn !== 'true') {
+                window.location.href = '/login';
+                return false;
+            }
+            return true;
+        }
+
+        // Kullanıcı bilgilerini yükle
+        function loadUserData() {
+            const userName = sessionStorage.getItem('userName') || 'Kullanıcı';
+            const userEmail = sessionStorage.getItem('userEmail') || 'kullanici@iett.gov.tr';
+            const userRole = sessionStorage.getItem('userRole') || 'kullanici';
+
+            document.getElementById('headerUserName').textContent = userName;
+            document.getElementById('headerUserRole').textContent = getRoleDisplayText(userRole);
+            document.getElementById('dropdownUserName').textContent = userName;
+            document.getElementById('dropdownUserEmail').textContent = userEmail;
+            document.getElementById('dropdownUserRole').textContent = getRoleDisplayText(userRole);
+        }
+
+        function getRoleDisplayText(role) {
+            switch(role) {
+                case 'admin': return 'Sistem Yöneticisi';
+                case 'sofor': return 'Şoför';
+                case 'yonetici': return 'Yönetici';
+                default: return 'Kullanıcı';
+            }
+        }
+
+        // Dropdown toggle
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('dropdownMenu');
+            const icon = document.getElementById('dropdownIcon');
+            
+            dropdown.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
+
+        // Logout
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = '/login';
+        }
+
+        // Hat ve otobüs seçeneklerini yükle
+        async function loadFormOptions() {
+            try {
+                // Hatları yükle
+                const hatlarResponse = await fetch('/api/hatlar');
+                if (hatlarResponse.ok) {
+                    const hatlar = await hatlarResponse.json();
+                    const hatSelect = document.getElementById('seferHat');
+                    const hatFilter = document.getElementById('hatFilter');
+                    
+                    // Mevcut seçenekleri temizle (ilk option hariç)
+                    hatSelect.innerHTML = '<option value="">Hat Seçin</option>';
+                    hatFilter.innerHTML = '<option value="">Tüm Hatlar</option>';
+                    
+                    hatlar.forEach(hat => {
+                        const option1 = new Option(`${hat.hatKodu} - ${hat.baslangicDuragi} - ${hat.bitisDuragi}`, hat.id);
+                        const option2 = new Option(`${hat.hatKodu} - ${hat.baslangicDuragi} - ${hat.bitisDuragi}`, hat.hatKodu);
+                        hatSelect.appendChild(option1);
+                        hatFilter.appendChild(option2);
+                    });
+                }
+                
+                // Şoförleri yükle
+                const soforlerResponse = await fetch('/api/kullanicilar');
+                if (soforlerResponse.ok) {
+                    const soforler = await soforlerResponse.json();
+                    const soforSelect = document.getElementById('seferSofor');
+                    
+                    // Mevcut seçenekleri temizle (ilk option hariç)
+                    soforSelect.innerHTML = '<option value="">Şoför Seçin</option>';
+                    
+                    soforler.forEach(sofor => {
+                        const option = new Option(`${sofor.ad} ${sofor.soyad}`, sofor.id);
+                        soforSelect.appendChild(option);
+                    });
+                }
+                
+                // Otobüsleri yükle
+                const otobuslerResponse = await fetch('/api/otobusler');
+                if (otobuslerResponse.ok) {
+                    const otobusler = await otobuslerResponse.json();
+                    const otobusSelect = document.getElementById('seferOtobus');
+                    
+                    // Mevcut seçenekleri temizle (ilk option hariç)
+                    otobusSelect.innerHTML = '<option value="">Otobüs Seçin</option>';
+                    
+                    otobusler.forEach(otobus => {
+                        const option = new Option(`${otobus.plaka} - ${otobus.model}`, otobus.id);
+                        otobusSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Form seçenekleri yüklenirken hata:', error);
+            }
+        }
+
+        // Seferleri API'den yükle
+        async function loadSeferler() {
+            try {
+                const response = await fetch('/api/seferler');
+                if (response.ok) {
+                    const apiSeferler = await response.json();
+                    console.log('API\'den gelen ham veriler:', apiSeferler);
+                    console.log('Toplam sefer sayısı:', apiSeferler.length);
+                    // API verilerini UI formatına dönüştür
+                    seferler = apiSeferler.map(sefer => ({
+                        id: sefer.id,
+                        seferNo: `SF${sefer.id.toString().padStart(3, '0')}`,
+                        hat: sefer.hat?.hatKodu || 'N/A',
+                        hatAdi: sefer.hat?.hatAdi || 'Bilinmiyor',
+                        sofor: sefer.sofor?.ad || 'Şoför Bilgisi',
+                        otobus: sefer.otobus?.plaka || 'N/A',
+                        tarih: new Date(sefer.kalkisZamani).toLocaleDateString('tr-TR'),
+                        baslangic: new Date(sefer.kalkisZamani).toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'}),
+                        bitis: new Date(sefer.varisZamani).toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'}),
+                        durum: mapDurumToFilter(sefer.durum) || 'planli',
+                        notlar: 'Sefer bilgisi',
+                        yolcuSayisi: sefer.yolcuSayisi || 0,
+                        durak: sefer.durak || '',
+                        yolcuNotlari: sefer.yolcuNotlari || ''
+                    }));
+                    console.log('Dönüştürülen seferler:', seferler);
+                    console.log('Dönüştürülen sefer sayısı:', seferler.length);
+                } else {
+                    console.warn('API\'den veri alınamadı, boş liste gösteriliyor.');
+                    seferler = [];
+                }
+                renderSeferlerTable(seferler);
+                populateHatFilter();
+                populateSoforFilter();
+            } catch (error) {
+                console.error('Seferler yüklenirken hata:', error);
+                // Hata durumunda demo veri kullan
+                seferler = [];
+                renderSeferlerTable(seferler);
+            }
+        }
+
+        // Hat filtresini dinamik olarak doldur
+        function populateHatFilter() {
+            const hatFilter = document.getElementById('hatFilter');
+            const uniqueHats = [...new Set(seferler.map(s => s.hat))].sort();
+            
+            // Mevcut seçimi koru
+            const currentValue = hatFilter.value;
+            
+            // Filtreyi temizle ve "Tüm Hatlar" seçeneğini ekle
+            hatFilter.innerHTML = '<option value="">Tüm Hatlar</option>';
+            
+            // Benzersiz hatları ekle
+            uniqueHats.forEach(hat => {
+                if (hat && hat !== 'N/A') {
+                    const option = document.createElement('option');
+                    option.value = hat;
+                    const sefer = seferler.find(s => s.hat === hat);
+                    option.textContent = `${hat} - ${sefer?.hatAdi || 'Hat Adı'}`;
+                    hatFilter.appendChild(option);
+                }
+            });
+            
+            // Önceki seçimi geri yükle
+            hatFilter.value = currentValue;
+            
+            // Hat select'ine click event ekle (arama özelliği için)
+            hatFilter.addEventListener('click', function() {
+                if (this.options.length > 1) { // Sadece "Tüm Hatlar" seçeneği yoksa
+                    showHatSearch();
+                }
+            });
+        }
+
+        // Hat arama kutusunu göster
+        function showHatSearch() {
+            const hatFilter = document.getElementById('hatFilter');
+            const hatSearch = document.getElementById('hatSearch');
+            const hatDropdown = document.getElementById('hatDropdown');
+            
+            // Select'i gizle, search input'unu göster
+            hatFilter.classList.add('hidden');
+            hatSearch.classList.remove('hidden');
+            hatSearch.focus();
+            
+            // Dropdown'ı doldur ve göster
+            populateHatDropdown('');
+            hatDropdown.classList.remove('hidden');
+        }
+
+        // Hat dropdown'ını doldur
+        function populateHatDropdown(searchTerm) {
+            const hatDropdown = document.getElementById('hatDropdown');
+            const uniqueHats = [...new Set(seferler.map(s => s.hat).filter(h => h && h !== 'N/A'))].sort();
+            
+            // Arama terimine göre filtrele
+            const filteredHatlar = uniqueHats.filter(hat => {
+                const sefer = seferler.find(s => s.hat === hat);
+                const hatText = `${hat} - ${sefer?.hatAdi || 'Hat Adı'}`;
+                return hatText.toLowerCase().includes(searchTerm.toLowerCase());
+            });
+            
+            hatDropdown.innerHTML = '';
+            
+            // "Tüm Hatlar" seçeneği
+            const allOption = document.createElement('div');
+            allOption.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200';
+            allOption.textContent = 'Tüm Hatlar';
+            allOption.onclick = () => selectHat('');
+            hatDropdown.appendChild(allOption);
+            
+            // Filtrelenmiş hatlar
+            filteredHatlar.forEach(hat => {
+                const sefer = seferler.find(s => s.hat === hat);
+                const option = document.createElement('div');
+                option.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer';
+                option.textContent = `${hat} - ${sefer?.hatAdi || 'Hat Adı'}`;
+                option.onclick = () => selectHat(hat);
+                hatDropdown.appendChild(option);
+            });
+        }
+
+        // Hat seç
+        function selectHat(hat) {
+            const hatFilter = document.getElementById('hatFilter');
+            const hatSearch = document.getElementById('hatSearch');
+            const hatDropdown = document.getElementById('hatDropdown');
+            
+            // Seçimi uygula
+            hatFilter.value = hat;
+            const sefer = seferler.find(s => s.hat === hat);
+            hatSearch.value = hat ? `${hat} - ${sefer?.hatAdi || 'Hat Adı'}` : '';
+            
+            // UI'ı geri getir
+            hatSearch.classList.add('hidden');
+            hatFilter.classList.remove('hidden');
+            hatDropdown.classList.add('hidden');
+            
+            // Filtrelemeyi uygula
+            filterSeferler();
+        }
+
+        // Hat arama fonksiyonu
+        function searchHat() {
+            const searchTerm = document.getElementById('hatSearch').value;
+            populateHatDropdown(searchTerm);
+        }
+
+        // Şoför filtresini dinamik olarak doldur
+        function populateSoforFilter() {
+            const soforFilter = document.getElementById('soforFilter');
+            const uniqueSoforler = [...new Set(seferler.map(s => s.sofor).filter(s => s && s !== 'Şoför Bilgisi'))].sort();
+            
+            // Mevcut seçimi koru
+            const currentValue = soforFilter.value;
+            
+            // Filtreyi temizle ve "Tüm Şoförler" seçeneğini ekle
+            soforFilter.innerHTML = '<option value="">Tüm Şoförler</option>';
+            
+            // Benzersiz şoförleri ekle
+            uniqueSoforler.forEach(sofor => {
+                const option = document.createElement('option');
+                option.value = sofor;
+                option.textContent = sofor;
+                soforFilter.appendChild(option);
+            });
+            
+            // Önceki seçimi geri yükle
+            soforFilter.value = currentValue;
+            
+            // Şoför select'ine click event ekle (arama özelliği için)
+            soforFilter.addEventListener('click', function() {
+                if (this.options.length > 1) { // Sadece "Tüm Şoförler" seçeneği yoksa
+                    showSoforSearch();
+                }
+            });
+        }
+
+        // Şoför arama kutusunu göster
+        function showSoforSearch() {
+            const soforFilter = document.getElementById('soforFilter');
+            const soforSearch = document.getElementById('soforSearch');
+            const soforDropdown = document.getElementById('soforDropdown');
+            
+            // Select'i gizle, search input'unu göster
+            soforFilter.classList.add('hidden');
+            soforSearch.classList.remove('hidden');
+            soforSearch.focus();
+            
+            // Dropdown'ı doldur ve göster
+            populateSoforDropdown('');
+            soforDropdown.classList.remove('hidden');
+        }
+
+        // Şoför dropdown'ını doldur
+        function populateSoforDropdown(searchTerm) {
+            const soforDropdown = document.getElementById('soforDropdown');
+            const uniqueSoforler = [...new Set(seferler.map(s => s.sofor).filter(s => s && s !== 'Şoför Bilgisi'))].sort();
+            
+            // Arama terimine göre filtrele
+            const filteredSoforler = uniqueSoforler.filter(sofor => 
+                sofor.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            soforDropdown.innerHTML = '';
+            
+            // "Tüm Şoförler" seçeneği
+            const allOption = document.createElement('div');
+            allOption.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-200';
+            allOption.textContent = 'Tüm Şoförler';
+            allOption.onclick = () => selectSofor('');
+            soforDropdown.appendChild(allOption);
+            
+            // Filtrelenmiş şoförler
+            filteredSoforler.forEach(sofor => {
+                const option = document.createElement('div');
+                option.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer';
+                option.textContent = sofor;
+                option.onclick = () => selectSofor(sofor);
+                soforDropdown.appendChild(option);
+            });
+        }
+
+        // Şoför seç
+        function selectSofor(sofor) {
+            const soforFilter = document.getElementById('soforFilter');
+            const soforSearch = document.getElementById('soforSearch');
+            const soforDropdown = document.getElementById('soforDropdown');
+            
+            // Seçimi uygula
+            soforFilter.value = sofor;
+            soforSearch.value = sofor || '';
+            
+            // UI'ı geri getir
+            soforSearch.classList.add('hidden');
+            soforFilter.classList.remove('hidden');
+            soforDropdown.classList.add('hidden');
+            
+            // Filtrelemeyi uygula
+            filterSeferler();
+        }
+
+        // Şoför arama fonksiyonu
+        function searchSofor() {
+            const searchTerm = document.getElementById('soforSearch').value;
+            populateSoforDropdown(searchTerm);
+        }
+
+        // Dışarı tıklandığında dropdown'ları kapat
+        document.addEventListener('click', function(event) {
+            const clickedContainer = event.target.closest('.relative');
+            
+            // Hat dropdown'ını kontrol et
+            const hatDropdown = document.getElementById('hatDropdown');
+            const hatSearch = document.getElementById('hatSearch');
+            const hatFilter = document.getElementById('hatFilter');
+            
+            if (!clickedContainer && !hatDropdown.classList.contains('hidden')) {
+                hatSearch.classList.add('hidden');
+                hatFilter.classList.remove('hidden');
+                hatDropdown.classList.add('hidden');
+            }
+            
+            // Şoför dropdown'ını kontrol et
+            const soforDropdown = document.getElementById('soforDropdown');
+            const soforSearch = document.getElementById('soforSearch');
+            const soforFilter = document.getElementById('soforFilter');
+            
+            if (!clickedContainer && !soforDropdown.classList.contains('hidden')) {
+                soforSearch.classList.add('hidden');
+                soforFilter.classList.remove('hidden');
+                soforDropdown.classList.add('hidden');
+            }
+        });
+
+        // Seferler tablosunu render et
+        function renderSeferlerTable(seferlerToRender) {
+            const tbody = document.getElementById('seferlerTableBody');
+            tbody.innerHTML = '';
+
+            seferlerToRender.forEach(sefer => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.style.position = 'relative';
+                row.style.overflow = 'visible';
+                
+                const durumBadge = getDurumBadge(sefer.durum, sefer.id);
+                
+                const yolcuSayisi = sefer.yolcuSayisi || 0;
+                const yolcuDisplay = yolcuSayisi > 0 ? `<span class="font-medium text-green-600">${yolcuSayisi}</span>` : '<span class="text-gray-400">-</span>';
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-center">${sefer.seferNo}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                        <div class="font-medium">${sefer.hat}</div>
+                        <div class="text-gray-500 text-xs">${sefer.hatAdi || 'Hat bilgisi yok'}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">${sefer.sofor}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">${sefer.otobus}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                        <div>${sefer.tarih}</div>
+                        <div class="text-gray-500 text-xs">${sefer.baslangic}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                        <div>${sefer.tarih}</div>
+                        <div class="text-gray-500 text-xs">${sefer.bitis}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">${yolcuDisplay}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center" style="position: relative; overflow: visible; z-index: 1;">${durumBadge}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                        <button onclick="openYolcuModal(${sefer.id})" class="text-green-600 hover:text-green-800 mr-3" title="Yolcu Sayısı Ekle">
+                            <i class="fas fa-users"></i>
+                        </button>
+                        <button onclick="editSefer(${sefer.id})" class="text-accent-blue hover:text-blue-600 mr-3">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteSefer(${sefer.id})" class="text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function mapDurumToFilter(durum) {
+            // Enum değerlerini filtre değerlerine dönüştür
+            const durumMap = {
+                0: 'planli',      // Planlandi
+                1: 'aktif',       // Devam
+                2: 'tamamlandi',  // Tamamlandi
+                3: 'iptal'        // IptalEdildi
+            };
+            return durumMap[durum] || 'planli';
+        }
+
+        function getDurumBadge(durum, seferId) {
+            const durumOptions = {
+                'planli': { text: 'Planlı', bgColor: 'bg-yellow-100', textColor: 'text-yellow-800', hoverBg: 'bg-yellow-500', borderColor: 'border-yellow-200', iconColor: 'text-yellow-500' },
+                'aktif': { text: 'Aktif', bgColor: 'bg-green-100', textColor: 'text-green-800', hoverBg: 'bg-green-500', borderColor: 'border-green-200', iconColor: 'text-green-500' },
+                'tamamlandi': { text: 'Tamamlandı', bgColor: 'bg-blue-100', textColor: 'text-blue-800', hoverBg: 'bg-blue-500', borderColor: 'border-blue-200', iconColor: 'text-blue-500' },
+                'iptal': { text: 'İptal', bgColor: 'bg-red-100', textColor: 'text-red-800', hoverBg: 'bg-red-500', borderColor: 'border-red-200', iconColor: 'text-red-500' }
+            };
+            
+            const currentDurum = durumOptions[durum] || durumOptions['planli'];
+            
+            // En uzun metin uzunluğunu hesapla
+            const maxTextLength = Math.max(...Object.values(durumOptions).map(option => option.text.length));
+            const dynamicWidth = Math.max(110, maxTextLength * 8 + 40); // Her karakter için ~8px + padding
+            
+            return `
+                <div class="custom-dropdown" data-sefer-id="${seferId}">
+                    <div onclick="toggleDropdown(${seferId})" 
+                         class="dropdown-trigger ${currentDurum.bgColor} ${currentDurum.textColor} border ${currentDurum.borderColor} hover:${currentDurum.hoverBg} hover:text-white px-4 py-1.5 rounded-full text-xs font-medium cursor-pointer transition-all duration-200 flex items-center justify-center shadow-sm hover:shadow-md"
+                         style="width: ${dynamicWidth}px;">
+                        <span class="dropdown-text font-semibold text-center flex-1">${currentDurum.text}</span>
+                        <i class="fas fa-chevron-down text-xs ml-2 dropdown-icon transition-transform duration-300 ${currentDurum.iconColor}"></i>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Modal functions
+        function openSeferModal() {
+            editingSeferId = null;
+            document.getElementById('modalTitle').textContent = 'Yeni Sefer';
+            document.getElementById('seferForm').reset();
+            document.getElementById('seferModal').classList.remove('hidden');
+        }
+
+        function closeSeferModal() {
+            document.getElementById('seferModal').classList.add('hidden');
+        }
+
+        async function editSefer(seferId) {
+            try {
+                const response = await fetch(`/api/seferler/${seferId}`);
+                if (response.ok) {
+                    const sefer = await response.json();
+                    
+                    editingSeferId = seferId;
+                    document.getElementById('modalTitle').textContent = 'Sefer Düzenle';
+                    
+                    // API'den gelen verileri forma yükle
+                    document.getElementById('seferHat').value = sefer.hatId || '';
+                    document.getElementById('seferSofor').value = sefer.soforId || '';
+                    document.getElementById('seferOtobus').value = sefer.otobusId || '';
+                    
+                    // Tarih ve saat bilgilerini ayır
+                    const kalkisDate = new Date(sefer.kalkisZamani);
+                    const varisDate = new Date(sefer.varisZamani);
+                    
+                    document.getElementById('seferTarih').value = kalkisDate.toISOString().split('T')[0];
+                    document.getElementById('seferBaslangic').value = kalkisDate.toTimeString().slice(0, 5);
+                    document.getElementById('seferBitis').value = varisDate.toTimeString().slice(0, 5);
+                    document.getElementById('seferNotlar').value = sefer.notlar || '';
+                    
+                    document.getElementById('seferModal').classList.remove('hidden');
+                } else {
+                    alert('Sefer bilgileri yüklenirken hata oluştu.');
+                }
+            } catch (error) {
+                console.error('Sefer düzenleme sırasında hata:', error);
+                alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+            }
+        }
+
+        async function deleteSefer(seferId) {
+            if (confirm('Bu seferi silmek istediğinizden emin misiniz?')) {
+                try {
+                    const response = await fetch(`/api/seferler/${seferId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        await loadSeferler();
+                    } else {
+                        alert('Sefer silinirken hata oluştu.');
+                    }
+                } catch (error) {
+                    console.error('Sefer silme sırasında hata:', error);
+                    alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+                }
+            }
+        }
+
+        // Form submission
+        document.getElementById('seferForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const tarih = document.getElementById('seferTarih').value;
+            const baslangicSaat = document.getElementById('seferBaslangic').value;
+            const bitisSaat = document.getElementById('seferBitis').value;
+            
+            const formData = {
+                hatId: parseInt(document.getElementById('seferHat').value),
+                soforId: parseInt(document.getElementById('seferSofor').value),
+                otobusId: parseInt(document.getElementById('seferOtobus').value),
+                kalkisZamani: `${tarih}T${baslangicSaat}:00`,
+                varisZamani: `${tarih}T${bitisSaat}:00`,
+                durum: 'Planlandi',
+                gidilenMesafeKm: 0
+            };
+
+            try {
+                if (editingSeferId) {
+                    // Update existing sefer
+                    const response = await fetch(`/api/seferler/${editingSeferId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ id: editingSeferId, ...formData })
+                    });
+                    
+                    if (response.ok) {
+                        await loadSeferler();
+                    } else {
+                        alert('Sefer güncellenirken hata oluştu.');
+                    }
+                } else {
+                    // Add new sefer
+                    const response = await fetch('/api/seferler', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    if (response.ok) {
+                        await loadSeferler();
+                    } else {
+                        alert('Sefer eklenirken hata oluştu.');
+                    }
+                }
+                closeSeferModal();
+            } catch (error) {
+                console.error('Sefer işlemi sırasında hata:', error);
+                alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+            }
+        });
+
+        function getHatAdi(hatNo) {
+            const hatlar = {
+                '15': 'Eminönü - Bağcılar',
+                '34': 'Kadıköy - Mecidiyeköy',
+                '500T': 'Taksim - Beylikdüzü'
+            };
+            return hatlar[hatNo] || 'Bilinmeyen Hat';
+        }
+
+        // Filter function
+        function filterSeferler() {
+            const seferIdFilter = document.getElementById('seferIdFilter').value;
+            const hatFilter = document.getElementById('hatFilter').value;
+            const soforFilter = document.getElementById('soforFilter').value;
+            const durumFilter = document.getElementById('durumFilter').value;
+            const tarihFilter = document.getElementById('tarihFilter').value;
+            const defaultDate = document.getElementById('tarihFilter').getAttribute('data-default');
+
+            let filteredSeferler = seferler;
+
+            if (seferIdFilter) {
+                filteredSeferler = filteredSeferler.filter(s => 
+                    s.id.toString().includes(seferIdFilter) || 
+                    s.seferNo.toLowerCase().includes(seferIdFilter.toLowerCase())
+                );
+            }
+
+            if (hatFilter) {
+                filteredSeferler = filteredSeferler.filter(s => s.hat === hatFilter);
+            }
+
+            if (soforFilter) {
+                filteredSeferler = filteredSeferler.filter(s => s.sofor && s.sofor.toLowerCase().includes(soforFilter.toLowerCase()));
+            }
+
+            if (durumFilter) {
+                filteredSeferler = filteredSeferler.filter(s => s.durum === durumFilter);
+            }
+
+            if (tarihFilter) {
+                // Tarih filtrelemesi için format dönüşümü
+                const filterDate = new Date(tarihFilter).toLocaleDateString('tr-TR');
+                // Tarih seçildiyse her zaman filtrele
+                filteredSeferler = filteredSeferler.filter(s => s.tarih === filterDate);
+            }
+
+            renderSeferlerTable(filteredSeferler);
+        }
+
+        // Clear all filters
+        function clearFilters() {
+            document.getElementById('seferIdFilter').value = '';
+            document.getElementById('hatFilter').value = '';
+            document.getElementById('soforFilter').value = '';
+            document.getElementById('durumFilter').value = '';
+            // Tarih filtresini boş bırak
+            document.getElementById('tarihFilter').value = '';
+            // Hat arama kutusunu gizle ve dropdown'ı temizle
+            document.getElementById('hatSearch').classList.add('hidden');
+            document.getElementById('hatFilter').classList.remove('hidden');
+            document.getElementById('hatDropdown').classList.add('hidden');
+            // Şoför arama kutusunu gizle ve dropdown'ı temizle
+            document.getElementById('soforSearch').classList.add('hidden');
+            document.getElementById('soforFilter').classList.remove('hidden');
+            document.getElementById('soforDropdown').classList.add('hidden');
+            renderSeferlerTable(seferler);
+        }
+
+        // Update sefer durum via dropdown
+        async function updateSeferDurum(seferId, newDurum) {
+            try {
+                // Enum değerlerine dönüştür
+                const durumToEnum = {
+                    'planli': 0,      // Planlandi
+                    'aktif': 1,       // Devam
+                    'tamamlandi': 2,  // Tamamlandi
+                    'iptal': 3        // IptalEdildi
+                };
+                
+                const enumValue = durumToEnum[newDurum];
+                if (enumValue === undefined) {
+                    console.error('Geçersiz durum değeri:', newDurum);
+                    return;
+                }
+                
+                const response = await fetch(`/api/seferler/${seferId}/durum`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ durum: enumValue })
+                });
+                
+                if (response.ok) {
+                    // Local state'i güncelle
+                    const seferIndex = seferler.findIndex(s => s.id === seferId);
+                    if (seferIndex !== -1) {
+                        seferler[seferIndex].durum = newDurum;
+                    }
+                    
+                    // Dropdown'ın görünümünü güncelle
+                    updateDropdownAppearance(seferId, newDurum);
+                    
+                    console.log('Sefer durumu başarıyla güncellendi');
+                } else {
+                    console.error('Durum güncellenirken hata oluştu:', response.statusText);
+                    // Hata durumunda dropdown'ı eski haline döndür
+                    loadSeferler();
+                }
+            } catch (error) {
+                console.error('Durum güncelleme sırasında hata:', error);
+                // Hata durumunda dropdown'ı eski haline döndür
+                loadSeferler();
+            }
+        }
+        
+        // Toggle custom dropdown
+        function toggleDropdown(seferId) {
+            const trigger = document.querySelector(`[data-sefer-id="${seferId}"] .dropdown-trigger`);
+            const icon = document.querySelector(`[data-sefer-id="${seferId}"] .dropdown-icon`);
+            
+            // Close all other dropdowns
+            document.querySelectorAll('.dropdown-portal').forEach(portal => {
+                portal.remove();
+            });
+            document.querySelectorAll('.dropdown-icon').forEach(iconEl => {
+                iconEl.classList.remove('rotate-180');
+            });
+            
+            // Check if dropdown is already open
+            if (icon.classList.contains('rotate-180')) {
+                icon.classList.remove('rotate-180');
+                return;
+            }
+            
+            // Get trigger position
+            const rect = trigger.getBoundingClientRect();
+            
+            // Create dropdown options
+            const durumOptions = {
+                'planli': { text: 'Planlı', bgColor: 'bg-yellow-100', textColor: 'text-yellow-800', hoverBg: 'bg-yellow-500' },
+                'aktif': { text: 'Aktif', bgColor: 'bg-green-100', textColor: 'text-green-800', hoverBg: 'bg-green-500' },
+                'tamamlandi': { text: 'Tamamlandı', bgColor: 'bg-blue-100', textColor: 'text-blue-800', hoverBg: 'bg-blue-500' },
+                'iptal': { text: 'İptal', bgColor: 'bg-red-100', textColor: 'text-red-800', hoverBg: 'bg-red-500' }
+            };
+            
+            // Get current durum
+            const currentDurum = trigger.closest('[data-sefer-id]').querySelector('.dropdown-text').textContent;
+            const currentDurumKey = Object.keys(durumOptions).find(key => durumOptions[key].text === currentDurum) || 'planli';
+            
+            let optionsHtml = '';
+            Object.keys(durumOptions).forEach(key => {
+                const option = durumOptions[key];
+                const isSelected = key === currentDurumKey;
+                optionsHtml += `
+                    <div onclick="selectDurum(${seferId}, '${key}', this)" 
+                         class="px-4 py-3 cursor-pointer rounded-lg transition-all duration-200 flex items-center justify-between group ${isSelected ? 'font-semibold bg-gray-50' : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100'}"
+                         data-value="${key}"
+                         style="margin: 2px 0;">
+                        <span class="${isSelected ? option.textColor : 'text-gray-700 group-hover:text-gray-900'}">${option.text}</span>
+                        ${isSelected ? '<svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>' : ''}
+                    </div>
+                `;
+            });
+            
+            // Create dropdown portal
+            const dropdownPortal = document.createElement('div');
+            dropdownPortal.className = 'dropdown-portal';
+            dropdownPortal.style.cssText = `
+                position: fixed;
+                top: ${rect.bottom + window.scrollY + 8}px;
+                left: ${rect.left + window.scrollX}px;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border: none;
+                border-radius: 12px;
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.05);
+                min-width: ${rect.width + 20}px;
+                z-index: 10000;
+                animation: dropdownSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+                transform-origin: top center;
+                padding: 8px;
+            `;
+            
+            dropdownPortal.innerHTML = optionsHtml;
+            document.body.appendChild(dropdownPortal);
+            
+            // Toggle icon
+            icon.classList.add('rotate-180');
+        }
+        
+        // Select durum from custom dropdown
+        function selectDurum(seferId, newDurum, element) {
+            // Update sefer durum via API
+            updateSeferDurum(seferId, newDurum);
+            
+            // Close dropdown portal
+            document.querySelectorAll('.dropdown-portal').forEach(portal => {
+                portal.remove();
+            });
+            const icon = document.querySelector(`[data-sefer-id="${seferId}"] .dropdown-icon`);
+            icon.classList.remove('rotate-180');
+        }
+        
+        // Update dropdown appearance after status change
+        function updateDropdownAppearance(seferId, newDurum) {
+            const durumOptions = {
+                'planli': { text: 'Planlı', bgColor: 'bg-yellow-100', textColor: 'text-yellow-800', hoverBg: 'bg-yellow-500' },
+                'aktif': { text: 'Aktif', bgColor: 'bg-green-100', textColor: 'text-green-800', hoverBg: 'bg-green-500' },
+                'tamamlandi': { text: 'Tamamlandı', bgColor: 'bg-blue-100', textColor: 'text-blue-800', hoverBg: 'bg-blue-500' },
+                'iptal': { text: 'İptal', bgColor: 'bg-red-100', textColor: 'text-red-800', hoverBg: 'bg-red-500' }
+            };
+            
+            const newDurumOption = durumOptions[newDurum];
+            if (!newDurumOption) return;
+            
+            // Find the dropdown trigger element
+            const trigger = document.querySelector(`[data-sefer-id="${seferId}"] .dropdown-trigger`);
+            const text = document.querySelector(`[data-sefer-id="${seferId}"] .dropdown-text`);
+            
+            if (trigger && text) {
+                // Remove old classes
+                Object.values(durumOptions).forEach(option => {
+                    trigger.classList.remove(option.bgColor, option.textColor);
+                    trigger.classList.remove(`hover:${option.hoverBg}`);
+                });
+                
+                // Add new classes
+                trigger.classList.add(newDurumOption.bgColor, newDurumOption.textColor, `hover:${newDurumOption.hoverBg}`);
+                
+                // Update text
+                text.textContent = newDurumOption.text;
+            }
+        }
+
+        // Initialize page
+        window.addEventListener('load', () => {
+            if (checkSession()) {
+                loadUserData();
+                loadSeferler();
+                loadFormOptions();
+                
+                // Set today's date as default (but don't filter)
+                const today = new Date().toISOString().split('T')[0];
+                const todayFormatted = new Date().toLocaleDateString('tr-TR');
+                document.getElementById('seferTarih').value = today;
+                // Don't set value for tarihFilter, just set data-default
+                document.getElementById('tarihFilter').setAttribute('data-default', todayFormatted);
+                
+                // Add event listeners for automatic filtering
+                document.getElementById('hatFilter').addEventListener('change', filterSeferler);
+                document.getElementById('durumFilter').addEventListener('change', filterSeferler);
+                document.getElementById('tarihFilter').addEventListener('change', filterSeferler);
+                
+                // Close custom dropdowns when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!event.target.closest('.custom-dropdown')) {
+                        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                            menu.classList.add('hidden');
+                        });
+                        document.querySelectorAll('.dropdown-icon').forEach(icon => {
+                            icon.classList.remove('rotate-180');
+                        });
+                    }
+                });
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            
+            // Close user dropdown
+            if (!dropdown.contains(event.target)) {
+                dropdownMenu.classList.add('hidden');
+                document.getElementById('dropdownIcon').classList.remove('rotate-180');
+            }
+            
+            // Close durum dropdowns
+            const clickedDropdownTrigger = event.target.closest('.dropdown-trigger');
+            if (!clickedDropdownTrigger) {
+                // Remove all dropdown portals
+                document.querySelectorAll('.dropdown-portal').forEach(portal => {
+                    portal.remove();
+                });
+                // Reset all dropdown icons
+                document.querySelectorAll('.dropdown-icon').forEach(iconEl => {
+                    iconEl.classList.remove('rotate-180');
+                });
+            }
+        });
+
+        // Yolcu Modal Functions
+        let selectedSeferId = null;
+
+        function openYolcuModal(seferId) {
+            const sefer = seferler.find(s => s.id === seferId);
+            if (!sefer) return;
+
+            selectedSeferId = seferId;
+            
+            // Sefer bilgisini göster
+            const seferBilgisi = document.getElementById('yolcuSeferBilgi');
+            seferBilgisi.innerHTML = `
+                <div class="font-medium text-gray-900">${sefer.seferNo} - ${sefer.hat}</div>
+                <div class="text-gray-600">${sefer.hatAdi}</div>
+                <div class="text-gray-600 mt-1">
+                    <i class="fas fa-user mr-1"></i>${sefer.sofor} | 
+                    <i class="fas fa-bus mr-1"></i>${sefer.otobus}
+                </div>
+                <div class="text-gray-600">
+                    <i class="fas fa-calendar mr-1"></i>${sefer.tarih} | 
+                    <i class="fas fa-clock mr-1"></i>${sefer.baslangic} - ${sefer.bitis}
+                </div>
+            `;
+            
+            // Form'u temizle
+            document.getElementById('yolcuForm').reset();
+            
+            // Eğer sefer için mevcut yolcu sayısı varsa, form alanlarını doldur
+            if (sefer.yolcuSayisi && sefer.yolcuSayisi > 0) {
+                document.getElementById('yolcuSayisiInput').value = sefer.yolcuSayisi;
+            }
+            if (sefer.durak) {
+                document.getElementById('yolcuDurak').value = sefer.durak;
+            }
+            if (sefer.yolcuNotlari) {
+                document.getElementById('yolcuNotlar').value = sefer.yolcuNotlari;
+            }
+            
+            // Modal'ı aç
+            document.getElementById('yolcuModal').classList.remove('hidden');
+        }
+
+        function closeYolcuModal() {
+            document.getElementById('yolcuModal').classList.add('hidden');
+            selectedSeferId = null;
+        }
+
+        // Yolcu Form Submission
+        document.getElementById('yolcuForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!selectedSeferId) return;
+            
+            const yolcuSayisi = parseInt(document.getElementById('yolcuSayisiInput').value);
+            const durak = document.getElementById('yolcuDurak') ? document.getElementById('yolcuDurak').value : null;
+            const notlar = document.getElementById('yolcuNotlar').value;
+            
+            const yolcuData = {
+                yolcuSayisi: yolcuSayisi,
+                durak: durak || null,
+                notlar: notlar || null
+            };
+            
+            try {
+                // API'ye yolcu sayımı gönder
+                const response = await fetch(`/api/seferler/${selectedSeferId}/yolcu-sayim`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(yolcuData)
+                });
+                
+                if (response.ok) {
+                    // Başarılı ise sefer verilerini güncelle
+                    const sefer = seferler.find(s => s.id === selectedSeferId);
+                    if (sefer) {
+                        sefer.yolcuSayisi = yolcuSayisi;
+                        sefer.durak = durak || '';
+                        sefer.yolcuNotlari = notlar || '';
+                        renderSeferlerTable(seferler);
+                    }
+                    closeYolcuModal();
+                    
+                    // Başarı mesajı göster
+                    showNotification('Yolcu sayısı başarıyla kaydedildi!', 'success');
+                } else {
+                    alert('Yolcu sayısı kaydedilirken hata oluştu.');
+                }
+            } catch (error) {
+                console.error('Yolcu sayımı kaydetme sırasında hata:', error);
+                
+                // Geçici olarak local storage'a kaydet
+                const sefer = seferler.find(s => s.id === selectedSeferId);
+                if (sefer) {
+                    sefer.yolcuSayisi = yolcuSayisi;
+                    sefer.durak = durak || '';
+                    sefer.yolcuNotlari = notlar || '';
+                    renderSeferlerTable(seferler);
+                    closeYolcuModal();
+                    showNotification('Yolcu sayısı geçici olarak kaydedildi!', 'warning');
+                }
+            }
+        });
+
+        // Bildirim gösterme fonksiyonu
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+            
+            const colors = {
+                'success': 'bg-green-500 text-white',
+                'error': 'bg-red-500 text-white',
+                'warning': 'bg-yellow-500 text-white',
+                'info': 'bg-blue-500 text-white'
+            };
+            
+            notification.className += ` ${colors[type] || colors.info}`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : type === 'warning' ? 'exclamation' : 'info'}-circle mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animasyon ile göster
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // 3 saniye sonra kaldır
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('seferModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeSeferModal();
+            }
+        });
+
+        document.getElementById('yolcuModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeYolcuModal();
+            }
+        });
+    </script>
+</body>
+</html>

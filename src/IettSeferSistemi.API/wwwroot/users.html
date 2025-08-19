@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kullanıcı Yönetimi - İETT Sefer Takip Sistemi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'soft-blue': '#e0f2fe',
+                        'soft-green': '#f0fdf4',
+                        'soft-purple': '#faf5ff',
+                        'soft-gray': '#f8fafc',
+                        'accent-blue': '#0ea5e9',
+                        'accent-green': '#22c55e',
+                        'accent-purple': '#a855f7'
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-soft-gray to-soft-blue min-h-screen">
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-accent-blue p-2 rounded-lg">
+                        <i class="fas fa-bus text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">İETT</h1>
+                        <p class="text-xs text-gray-500">Sefer Takip Sistemi</p>
+                    </div>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="/" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Anasayfa</a>
+                    <a href="/seferler" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Seferler</a>
+                    <a href="/hatlar" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Hatlar</a>
+                    <a href="/users" class="text-accent-blue font-medium border-b-2 border-accent-blue pb-1">Kullanıcılar</a>
+                    <a href="/raporlar" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Raporlar</a>
+                    <a href="/swagger" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">API</a>
+                </nav>
+                
+                <!-- User Info Dropdown -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative" id="userDropdown">
+                        <button class="flex items-center space-x-3 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 transition-all shadow-sm" onclick="toggleUserDropdown()">
+                            <div class="w-8 h-8 bg-gradient-to-r from-accent-blue to-blue-600 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white text-sm"></i>
+                            </div>
+                            <div class="hidden sm:block text-left">
+                                <div class="text-sm font-semibold text-gray-800">Kullanıcı</div>
+                                <div class="text-xs text-gray-500">Kullanıcı</div>
+                            </div>
+                            <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" id="dropdownIcon"></i>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 hidden" id="dropdownMenu">
+                            <div class="px-4 py-3 border-b border-gray-100">
+                                <div class="text-sm font-semibold text-gray-800">Kullanıcı</div>
+                                <div class="text-xs text-gray-500">kullanici@iett.gov.tr</div>
+                                <div class="text-xs text-accent-blue font-medium mt-1">Kullanıcı</div>
+                            </div>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-user-circle mr-3 text-gray-400"></i>
+                                Profil Ayarları
+                            </a>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-cog mr-3 text-gray-400"></i>
+                                Hesap Ayarları
+                            </a>
+                            <div class="border-t border-gray-100 mt-2 pt-2">
+                                <button class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors" onclick="logout()">
+                                    <i class="fas fa-sign-out-alt mr-3 text-red-500"></i>
+                                    Çıkış Yap
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Kullanıcı Yönetimi</h1>
+                    <p class="text-gray-600 mt-2">Sisteme erişebilecek kullanıcıları yönetin</p>
+                </div>
+                <button onclick="openAddUserModal()" class="bg-accent-blue hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-sm">
+                    <i class="fas fa-plus mr-2"></i>
+                    Yeni Kullanıcı
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Toplam Kullanıcı</p>
+                        <p class="text-2xl font-bold text-gray-900" id="totalUsers">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-accent-blue/10 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-users text-accent-blue text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Aktif Kullanıcı</p>
+                        <p class="text-2xl font-bold text-green-600" id="activeUsers">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-user-check text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Şoförler</p>
+                        <p class="text-2xl font-bold text-purple-600" id="driverCount">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-id-card text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Yöneticiler</p>
+                        <p class="text-2xl font-bold text-orange-600" id="adminCount">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-user-shield text-orange-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters and Search -->
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="searchInput" placeholder="Kullanıcı ara..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <select id="roleFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                        <option value="">Tüm Roller</option>
+                        <option value="admin">Sistem Yöneticisi</option>
+                        <option value="yonetici">Yönetici</option>
+                        <option value="sofor">Şoför</option>
+                    </select>
+                    <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                        <option value="">Tüm Durumlar</option>
+                        <option value="active">Aktif</option>
+                        <option value="inactive">Pasif</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kullanıcı</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durum</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Son Giriş</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Users will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add/Edit User Modal -->
+    <div id="userModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="modalTitle" class="text-lg font-semibold text-gray-900">Yeni Kullanıcı Ekle</h3>
+                <button onclick="closeUserModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="userForm">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Ad Soyad</label>
+                        <input type="text" id="userName" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">E-posta</label>
+                        <input type="email" id="userEmail" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kullanıcı Adı</label>
+                        <input type="text" id="userUsername" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Şifre</label>
+                        <input type="password" id="userPassword" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent" placeholder="Değiştirmek istemiyorsanız boş bırakın">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Rol</label>
+                        <select id="userRole" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                            <option value="">Rol Seçin</option>
+                            <option value="admin">Sistem Yöneticisi</option>
+                            <option value="yonetici">Yönetici</option>
+                            <option value="sofor">Şoför</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="userActive" checked class="rounded border-gray-300 text-accent-blue focus:ring-accent-blue">
+                            <span class="ml-2 text-sm text-gray-700">Aktif kullanıcı</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3 mt-6">
+                    <button type="button" onclick="closeUserModal()" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        İptal
+                    </button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-accent-blue text-white rounded-lg hover:bg-blue-600 transition-colors">
+                        Kaydet
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Users data - will be loaded from API
+        let users = [];
+
+        let editingUserId = null;
+
+        // Load users from API
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/kullanicilar');
+                if (response.ok) {
+                    users = await response.json();
+                    renderUsersTable();
+                    updateStats();
+                } else {
+                    console.error('Kullanıcılar yüklenirken hata oluştu:', response.statusText);
+                    // Fallback: demo kullanıcıları yükle
+                    loadDemoUsers();
+                }
+            } catch (error) {
+                console.error('API bağlantı hatası:', error);
+                // Fallback: demo kullanıcıları yükle
+                loadDemoUsers();
+            }
+        }
+
+        // Demo users for fallback
+        function loadDemoUsers() {
+            users = [
+                {
+                    id: 1,
+                    name: 'Admin Kullanıcı',
+                    email: 'admin@iett.gov.tr',
+                    username: 'admin',
+                    role: 'admin',
+                    active: true,
+                    lastLogin: '2024-01-15 14:30'
+                },
+                {
+                    id: 2,
+                    name: 'Ahmet Yılmaz',
+                    email: 'ahmet.yilmaz@iett.gov.tr',
+                    username: 'sofor',
+                    role: 'sofor',
+                    active: true,
+                    lastLogin: '2024-01-15 09:15'
+                },
+                {
+                    id: 3,
+                    name: 'Fatma Kaya',
+                    email: 'fatma.kaya@iett.gov.tr',
+                    username: 'yonetici',
+                    role: 'yonetici',
+                    active: true,
+                    lastLogin: '2024-01-14 16:45'
+                },
+                {
+                    id: 4,
+                    name: 'Mehmet Demir',
+                    email: 'mehmet.demir@iett.gov.tr',
+                    username: 'mehmet.demir',
+                    role: 'sofor',
+                    active: false,
+                    lastLogin: '2024-01-10 11:20'
+                }
+            ];
+            renderUsersTable();
+            updateStats();
+        }
+
+        // Session control
+        function checkSession() {
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            if (!isLoggedIn || isLoggedIn !== 'true') {
+                window.location.href = '/login';
+                return false;
+            }
+            return true;
+        }
+
+        // Load user data from session
+        function loadUserData() {
+            const userName = sessionStorage.getItem('userName') || 'Kullanıcı';
+            const userEmail = sessionStorage.getItem('userEmail') || 'kullanici@iett.gov.tr';
+            const userRole = sessionStorage.getItem('userRole') || 'user';
+            
+            // Update user name in header button
+            const headerUserName = document.querySelector('button .text-sm.font-semibold.text-gray-800');
+            if (headerUserName) {
+                headerUserName.textContent = userName;
+            }
+            
+            // Update user role in header button
+            const headerUserRole = document.querySelector('button .text-xs.text-gray-500');
+            if (headerUserRole) {
+                const roleText = getRoleDisplayText(userRole);
+                headerUserRole.textContent = roleText;
+            }
+            
+            // Update user info in dropdown menu
+            const dropdownUserName = document.querySelector('#dropdownMenu .text-sm.font-semibold.text-gray-800');
+            if (dropdownUserName) {
+                dropdownUserName.textContent = userName;
+            }
+            
+            const dropdownUserEmail = document.querySelector('#dropdownMenu .text-xs.text-gray-500:not(.text-accent-blue)');
+            if (dropdownUserEmail) {
+                dropdownUserEmail.textContent = userEmail;
+            }
+            
+            const dropdownUserRole = document.querySelector('#dropdownMenu .text-xs.text-accent-blue');
+            if (dropdownUserRole) {
+                const roleText = getRoleDisplayText(userRole);
+                dropdownUserRole.textContent = roleText;
+            }
+        }
+
+        // Get role display text
+        function getRoleDisplayText(role) {
+            switch(role) {
+                case 'admin':
+                    return 'Sistem Yöneticisi';
+                case 'sofor':
+                    return 'Şoför';
+                case 'yonetici':
+                    return 'Yönetici';
+                default:
+                    return 'Kullanıcı';
+            }
+        }
+
+        // User Dropdown Functions
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('dropdownMenu');
+            const icon = document.getElementById('dropdownIcon');
+            
+            if (dropdown.classList.contains('hidden')) {
+                dropdown.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                dropdown.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userDropdown = document.getElementById('userDropdown');
+            const dropdown = document.getElementById('dropdownMenu');
+            const icon = document.getElementById('dropdownIcon');
+            
+            if (!userDropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        });
+
+        // Logout function
+        function logout() {
+            // if (confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
+                sessionStorage.clear();
+                window.location.href = '/login';
+            // }
+        }
+
+        // Update stats
+        function updateStats() {
+            const totalUsers = users.length;
+            const activeUsers = users.filter(u => u.active).length;
+            const driverCount = users.filter(u => u.role === 'sofor').length;
+            const adminCount = users.filter(u => u.role === 'admin' || u.role === 'yonetici').length;
+
+            document.getElementById('totalUsers').textContent = totalUsers;
+            document.getElementById('activeUsers').textContent = activeUsers;
+            document.getElementById('driverCount').textContent = driverCount;
+            document.getElementById('adminCount').textContent = adminCount;
+        }
+
+        // Render users table
+        function renderUsersTable(usersToRender = users) {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+
+            usersToRender.forEach(user => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                
+                const statusBadge = user.active 
+                    ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Aktif</span>'
+                    : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Pasif</span>';
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-gradient-to-r from-accent-blue to-blue-600 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white text-sm"></i>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">${user.name} (${user.username})</div>
+                                <div class="text-sm text-gray-500">${user.email}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-sm text-gray-900">${getRoleDisplayText(user.role)}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        ${statusBadge}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${user.lastLogin}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onclick="editUser(${user.id})" class="text-accent-blue hover:text-blue-600 mr-3">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteUser(${user.id})" class="text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Filter users
+        function filterUsers() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const roleFilter = document.getElementById('roleFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            let filteredUsers = users.filter(user => {
+                const matchesSearch = user.name.toLowerCase().includes(searchTerm) || 
+                                    user.email.toLowerCase().includes(searchTerm);
+                const matchesRole = !roleFilter || user.role === roleFilter;
+                const matchesStatus = !statusFilter || 
+                                    (statusFilter === 'active' && user.active) ||
+                                    (statusFilter === 'inactive' && !user.active);
+                
+                return matchesSearch && matchesRole && matchesStatus;
+            });
+
+            renderUsersTable(filteredUsers);
+        }
+
+        // Modal functions
+        function openAddUserModal() {
+            editingUserId = null;
+            document.getElementById('modalTitle').textContent = 'Yeni Kullanıcı Ekle';
+            document.getElementById('userForm').reset();
+            document.getElementById('userActive').checked = true;
+            document.getElementById('userModal').classList.remove('hidden');
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').classList.add('hidden');
+        }
+
+        function editUser(userId) {
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+
+            editingUserId = userId;
+            document.getElementById('modalTitle').textContent = 'Kullanıcı Düzenle';
+            document.getElementById('userName').value = user.name;
+            document.getElementById('userEmail').value = user.email;
+            document.getElementById('userUsername').value = user.username;
+            document.getElementById('userPassword').value = '';
+            document.getElementById('userRole').value = user.role;
+            document.getElementById('userActive').checked = user.active;
+            document.getElementById('userModal').classList.remove('hidden');
+        }
+
+        async function deleteUser(userId) {
+            if (confirm('Bu kullanıcıyı silmek istediğinizden emin misiniz?')) {
+                try {
+                    const response = await fetch(`/api/kullanicilar/${userId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        // API'den başarılı silme sonrası kullanıcıları yeniden yükle
+                        await loadUsers();
+                    } else {
+                        alert('Kullanıcı silinirken hata oluştu.');
+                    }
+                } catch (error) {
+                    console.error('Silme hatası:', error);
+                    alert('Kullanıcı silinirken hata oluştu.');
+                }
+            }
+        }
+
+        // Form submission
+        document.getElementById('userForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('userName').value,
+                email: document.getElementById('userEmail').value,
+                username: document.getElementById('userUsername').value,
+                role: document.getElementById('userRole').value,
+                active: document.getElementById('userActive').checked
+            };
+            
+            // Şifre alanı doldurulmuşsa ekle
+            const passwordValue = document.getElementById('userPassword').value;
+            if (passwordValue && passwordValue.trim() !== '') {
+                formData.password = passwordValue;
+            }
+
+            try {
+                let response;
+                
+                if (editingUserId) {
+                    // Update existing user
+                    response = await fetch(`/api/kullanicilar/${editingUserId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                } else {
+                    // Add new user
+                    response = await fetch('/api/kullanicilar', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                }
+
+                if (response.ok) {
+                    // API'den başarılı işlem sonrası kullanıcıları yeniden yükle
+                    await loadUsers();
+                    closeUserModal();
+                } else {
+                    const errorText = await response.text();
+                    alert('Kullanıcı kaydedilirken hata oluştu: ' + errorText);
+                }
+            } catch (error) {
+                console.error('Kaydetme hatası:', error);
+                alert('Kullanıcı kaydedilirken hata oluştu.');
+            }
+        });
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', filterUsers);
+        document.getElementById('roleFilter').addEventListener('change', filterUsers);
+        document.getElementById('statusFilter').addEventListener('change', filterUsers);
+
+        // Initialize page
+        window.addEventListener('load', () => {
+            if (checkSession()) {
+                loadUserData();
+                loadUsers(); // API'den kullanıcıları yükle
+            }
+        });
+
+        // Check session on page focus
+        window.addEventListener('focus', function() {
+            checkSession();
+        });
+    </script>
+</body>
+</html>

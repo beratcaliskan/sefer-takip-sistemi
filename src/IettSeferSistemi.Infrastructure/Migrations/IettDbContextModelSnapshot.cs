@@ -65,22 +65,38 @@ namespace IettSeferSistemi.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Aciklama")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BaslangicDuragi")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BitisDuragi")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DurakSayisi")
+                        .HasColumnType("int");
+
                     b.Property<bool>("Durum")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("GuncellenmeTarihi")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("HatAdi")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("HatKodu")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<double>("MesafeKm")
+                        .HasColumnType("float");
+
                     b.Property<DateTime>("OlusturulmaTarihi")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("TahminSureDakika")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -95,6 +111,9 @@ namespace IettSeferSistemi.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Ad")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -105,6 +124,10 @@ namespace IettSeferSistemi.Infrastructure.Migrations
 
                     b.Property<DateTime?>("GuncellenmeTarihi")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("KullaniciAdi")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("OlusturulmaTarihi")
                         .HasColumnType("datetime2");
@@ -164,9 +187,8 @@ namespace IettSeferSistemi.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Durum")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Durum")
+                        .HasColumnType("int");
 
                     b.Property<double>("GidilenMesafeKm")
                         .HasColumnType("float");
@@ -189,7 +211,7 @@ namespace IettSeferSistemi.Infrastructure.Migrations
                     b.Property<int>("SoforId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("VarisZamani")
+                    b.Property<DateTime?>("VarisZamani")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -280,8 +302,14 @@ namespace IettSeferSistemi.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Durak")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("GuncellenmeTarihi")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Notlar")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("OlusturulmaTarihi")
                         .HasColumnType("datetime2");

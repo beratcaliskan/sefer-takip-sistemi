@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hatlar - İETT Sefer Takip Sistemi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'soft-blue': '#e0f2fe',
+                        'soft-green': '#f0fdf4',
+                        'soft-purple': '#faf5ff',
+                        'soft-gray': '#f8fafc',
+                        'accent-blue': '#0ea5e9',
+                        'accent-green': '#22c55e',
+                        'accent-purple': '#a855f7'
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-soft-gray to-soft-blue min-h-screen">
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-accent-blue p-2 rounded-lg">
+                        <i class="fas fa-bus text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">İETT</h1>
+                        <p class="text-xs text-gray-500">Sefer Takip Sistemi</p>
+                    </div>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="/" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Anasayfa</a>
+                    <a href="/seferler" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Seferler</a>
+                    <a href="/hatlar" class="text-accent-blue font-medium border-b-2 border-accent-blue pb-1">Hatlar</a>
+                    <a href="/users" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Kullanıcılar</a>
+                    <a href="/raporlar" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Raporlar</a>
+                    <a href="/swagger" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">API</a>
+                </nav>
+                
+                <!-- User Info Dropdown -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative" id="userDropdown">
+                        <button class="flex items-center space-x-3 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 transition-all shadow-sm" onclick="toggleUserDropdown()">
+                            <div class="w-8 h-8 bg-gradient-to-r from-accent-blue to-blue-600 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white text-sm"></i>
+                            </div>
+                            <div class="hidden sm:block text-left">
+                                <div class="text-sm font-semibold text-gray-800" id="headerUserName">Kullanıcı</div>
+                                <div class="text-xs text-gray-500" id="headerUserRole">Kullanıcı</div>
+                            </div>
+                            <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" id="dropdownIcon"></i>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 hidden" id="dropdownMenu">
+                            <div class="px-4 py-3 border-b border-gray-100">
+                                <div class="text-sm font-semibold text-gray-800" id="dropdownUserName">Kullanıcı</div>
+                                <div class="text-xs text-gray-500" id="dropdownUserEmail">kullanici@iett.gov.tr</div>
+                                <div class="text-xs text-accent-blue font-medium mt-1" id="dropdownUserRole">Kullanıcı</div>
+                            </div>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-user-circle mr-3 text-gray-400"></i>
+                                Profil Ayarları
+                            </a>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-cog mr-3 text-gray-400"></i>
+                                Hesap Ayarları
+                            </a>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-bell mr-3 text-gray-400"></i>
+                                Bildirimler
+                            </a>
+                            <div class="border-t border-gray-100 mt-2 pt-2">
+                                <button class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors" onclick="logout()">
+                                    <i class="fas fa-sign-out-alt mr-3 text-red-500"></i>
+                                    Çıkış Yap
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button class="md:hidden p-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-bars text-gray-600"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Hatlar</h1>
+                    <p class="text-gray-600">Otobüs hatları yönetimi</p>
+                </div>
+                <button onclick="openHatModal()" class="bg-accent-blue hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-sm">
+                    <i class="fas fa-plus mr-2"></i>
+                    Yeni Hat
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100">
+                        <i class="fas fa-route text-blue-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Toplam Hat</p>
+                        <p class="text-2xl font-bold text-gray-900" id="toplamHat">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100">
+                        <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Aktif Hat</p>
+                        <p class="text-2xl font-bold text-gray-900" id="aktifHat">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-100">
+                        <i class="fas fa-pause-circle text-yellow-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Pasif Hat</p>
+                        <p class="text-2xl font-bold text-gray-900" id="pasifHat">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-100">
+                        <i class="fas fa-clock text-purple-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Ortalama Süre</p>
+                        <p class="text-2xl font-bold text-gray-900" id="ortalamaSure">0 dk</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Hat Arama</label>
+                    <input type="text" id="hatArama" placeholder="Hat numarası veya adı..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Durum</label>
+                    <select id="durumFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent">
+                        <option value="">Tüm Durumlar</option>
+                        <option value="aktif">Aktif</option>
+                        <option value="pasif">Pasif</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button onclick="filterHatlar()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-search mr-2"></i>
+                        Filtrele
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hatlar Grid -->
+        <div id="hatlarGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Hat cards will be populated here -->
+        </div>
+    </main>
+
+    <!-- Hat Modal -->
+    <div id="hatModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 id="modalTitle" class="text-lg font-semibold text-gray-900">Yeni Hat</h3>
+                </div>
+                <form id="hatForm" class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Hat Numarası</label>
+                            <input type="text" id="hatNumarasi" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent" placeholder="Örn: 15, 34A, 500T">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Başlangıç Durağı</label>
+                            <input type="text" id="baslangicDuragi" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent" placeholder="Başlangıç durağı">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Bitiş Durağı</label>
+                            <input type="text" id="bitisDuragi" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent" placeholder="Bitiş durağı">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Mesafe (km)</label>
+                            <input type="number" id="mesafe" step="0.1" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent" placeholder="Örn: 25.5">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tahmini Süre (dk)</label>
+                            <input type="number" id="tahminSure" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent" placeholder="Örn: 90">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Durak Sayısı</label>
+                            <input type="number" id="durakSayisi" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent" placeholder="Örn: 45">
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="hatDurum" checked class="rounded border-gray-300 text-accent-blue focus:ring-accent-blue">
+                            <span class="ml-2 text-sm text-gray-700">Aktif hat</span>
+                        </label>
+                    </div>
+                    <div class="mt-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Açıklama</label>
+                        <textarea id="hatAciklama" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-blue focus:border-transparent" placeholder="Hat hakkında açıklama..."></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" onclick="closeHatModal()" class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors">
+                            İptal
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-accent-blue hover:bg-blue-600 text-white rounded-lg font-medium transition-colors">
+                            Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let hatlar = [];
+        let editingHatId = null;
+
+        // Session kontrolü
+        function checkSession() {
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            if (!isLoggedIn || isLoggedIn !== 'true') {
+                window.location.href = '/login';
+                return false;
+            }
+            return true;
+        }
+
+        // Kullanıcı bilgilerini yükle
+        function loadUserData() {
+            const userName = sessionStorage.getItem('userName') || 'Kullanıcı';
+            const userEmail = sessionStorage.getItem('userEmail') || 'kullanici@iett.gov.tr';
+            const userRole = sessionStorage.getItem('userRole') || 'kullanici';
+
+            document.getElementById('headerUserName').textContent = userName;
+            document.getElementById('headerUserRole').textContent = getRoleDisplayText(userRole);
+            document.getElementById('dropdownUserName').textContent = userName;
+            document.getElementById('dropdownUserEmail').textContent = userEmail;
+            document.getElementById('dropdownUserRole').textContent = getRoleDisplayText(userRole);
+        }
+
+        function getRoleDisplayText(role) {
+            switch(role) {
+                case 'admin': return 'Sistem Yöneticisi';
+                case 'sofor': return 'Şoför';
+                case 'yonetici': return 'Yönetici';
+                default: return 'Kullanıcı';
+            }
+        }
+
+        // Dropdown toggle
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('dropdownMenu');
+            const icon = document.getElementById('dropdownIcon');
+            
+            dropdown.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
+
+        // Logout
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = '/login';
+        }
+
+        // Hatları API'den yükle
+        async function loadHatlar() {
+            try {
+                const response = await fetch('/api/hatlar');
+                if (response.ok) {
+                    const apiHatlar = await response.json();
+                    // API verilerini UI formatına dönüştür
+                    hatlar = apiHatlar.map(hat => ({
+                        id: hat.id,
+                        numarasi: hat.hatKodu,
+                        adi: `${hat.baslangicDuragi} → ${hat.bitisDuragi}`,
+                        baslangic: hat.baslangicDuragi || 'Başlangıç',
+                        bitis: hat.bitisDuragi || 'Bitiş',
+                        mesafe: hat.mesafeKm || 0,
+                        tahminSure: hat.tahminSureDakika || 0,
+                        durakSayisi: hat.durakSayisi || 0,
+                        durum: hat.durum ? 'aktif' : 'pasif',
+                        aciklama: hat.aciklama || 'Hat bilgisi'
+                    }));
+                } else {
+                    // API'den veri alınamazsa demo veri kullan
+                    hatlar = [
+                        {
+                            id: 1,
+                            numarasi: '15',
+                            adi: 'Eminönü → Bağcılar',
+                            baslangic: 'Eminönü',
+                            bitis: 'Bağcılar',
+                            mesafe: 28.5,
+                            tahminSure: 95,
+                            durakSayisi: 52,
+                            durum: 'aktif',
+                            aciklama: 'Ana arterlerden geçen yoğun hat'
+                        }
+                    ];
+                }
+                renderHatlarGrid(hatlar);
+                updateStats();
+            } catch (error) {
+                console.error('Hatlar yüklenirken hata:', error);
+                // Hata durumunda demo veri kullan
+                hatlar = [];
+                renderHatlarGrid(hatlar);
+                updateStats();
+            }
+        }
+
+        // Hatlar grid render et
+        function renderHatlarGrid(hatlarToRender) {
+            const grid = document.getElementById('hatlarGrid');
+            grid.innerHTML = '';
+
+            hatlarToRender.forEach(hat => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow';
+                
+                const durumBadge = hat.durum === 'aktif' 
+                    ? '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Aktif</span>'
+                    : '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Pasif</span>';
+                
+                card.innerHTML = `
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-accent-blue rounded-lg flex items-center justify-center">
+                                <span class="text-white font-bold text-lg">${hat.numarasi}</span>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">${hat.adi}</h3>
+                            </div>
+                        </div>
+                        ${durumBadge}
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="text-center p-3 bg-gray-50 rounded-lg">
+                            <div class="text-2xl font-bold text-gray-900">${hat.mesafe}</div>
+                            <div class="text-xs text-gray-500">km</div>
+                        </div>
+                        <div class="text-center p-3 bg-gray-50 rounded-lg">
+                            <div class="text-2xl font-bold text-gray-900">${hat.tahminSure}</div>
+                            <div class="text-xs text-gray-500">dakika</div>
+                        </div>
+                        <div class="text-center p-3 bg-gray-50 rounded-lg">
+                            <div class="text-2xl font-bold text-gray-900">${hat.durakSayisi}</div>
+                            <div class="text-xs text-gray-500">durak</div>
+                        </div>
+                        <div class="text-center p-3 bg-gray-50 rounded-lg">
+                            <div class="text-2xl font-bold text-gray-900">${Math.round(hat.mesafe / hat.tahminSure * 60)}</div>
+                            <div class="text-xs text-gray-500">km/h</div>
+                        </div>
+                    </div>
+                    
+                    <p class="text-sm text-gray-600 mb-4">${hat.aciklama}</p>
+                    
+                    <div class="flex justify-end space-x-2">
+                        <button onclick="editHat(${hat.id})" class="text-accent-blue hover:text-blue-600 p-2 rounded-lg hover:bg-blue-50 transition-colors">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteHat(${hat.id})" class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // İstatistikleri güncelle
+        function updateStats() {
+            const toplam = hatlar.length;
+            const aktif = hatlar.filter(h => h.durum === 'aktif').length;
+            const pasif = hatlar.filter(h => h.durum === 'pasif').length;
+            const ortalama = hatlar.length > 0 ? Math.round(hatlar.reduce((sum, h) => sum + h.tahminSure, 0) / hatlar.length) : 0;
+
+            document.getElementById('toplamHat').textContent = toplam;
+            document.getElementById('aktifHat').textContent = aktif;
+            document.getElementById('pasifHat').textContent = pasif;
+            document.getElementById('ortalamaSure').textContent = ortalama + ' dk';
+        }
+
+        // Modal functions
+        function openHatModal() {
+            editingHatId = null;
+            document.getElementById('modalTitle').textContent = 'Yeni Hat';
+            document.getElementById('hatForm').reset();
+            document.getElementById('hatModal').classList.remove('hidden');
+        }
+
+        function closeHatModal() {
+            document.getElementById('hatModal').classList.add('hidden');
+        }
+
+        function editHat(hatId) {
+            const hat = hatlar.find(h => h.id === hatId);
+            if (!hat) return;
+
+            editingHatId = hatId;
+            document.getElementById('modalTitle').textContent = 'Hat Düzenle';
+            document.getElementById('hatNumarasi').value = hat.numarasi;
+
+            document.getElementById('baslangicDuragi').value = hat.baslangic;
+            document.getElementById('bitisDuragi').value = hat.bitis;
+            document.getElementById('mesafe').value = hat.mesafe;
+            document.getElementById('tahminSure').value = hat.tahminSure;
+            document.getElementById('durakSayisi').value = hat.durakSayisi;
+            document.getElementById('hatDurum').checked = hat.durum === 'aktif';
+            document.getElementById('hatAciklama').value = hat.aciklama;
+            document.getElementById('hatModal').classList.remove('hidden');
+        }
+
+        async function deleteHat(hatId) {
+            if (confirm('Bu hattı silmek istediğinizden emin misiniz?')) {
+                try {
+                    const response = await fetch(`/api/hatlar/${hatId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        // Başarılı silme sonrası hatları yeniden yükle
+                        await loadHatlar();
+                    } else {
+                        alert('Hat silinirken hata oluştu.');
+                    }
+                } catch (error) {
+                    console.error('Hat silme sırasında hata:', error);
+                    alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+                }
+            }
+        }
+
+        // Form submission
+        document.getElementById('hatForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                hatKodu: document.getElementById('hatNumarasi').value,
+                baslangicDuragi: document.getElementById('baslangicDuragi').value,
+                bitisDuragi: document.getElementById('bitisDuragi').value,
+                mesafeKm: parseFloat(document.getElementById('mesafe').value) || 0,
+                tahminSureDakika: parseInt(document.getElementById('tahminSure').value) || 0,
+                durakSayisi: parseInt(document.getElementById('durakSayisi').value) || 0,
+                aciklama: document.getElementById('hatAciklama').value,
+                durum: document.getElementById('hatDurum').checked
+            };
+
+            try {
+                if (editingHatId) {
+                    // Update existing hat
+                    const response = await fetch(`/api/hatlar/${editingHatId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ id: editingHatId, ...formData })
+                    });
+                    
+                    if (response.ok) {
+                        // Başarılı güncelleme sonrası hatları yeniden yükle
+                        await loadHatlar();
+                    } else {
+                        alert('Hat güncellenirken hata oluştu.');
+                    }
+                } else {
+                    // Add new hat
+                    const response = await fetch('/api/hatlar', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    if (response.ok) {
+                        // Başarılı ekleme sonrası hatları yeniden yükle
+                        await loadHatlar();
+                    } else {
+                        alert('Hat eklenirken hata oluştu.');
+                    }
+                }
+            } catch (error) {
+                console.error('Hat işlemi sırasında hata:', error);
+                alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+            }
+
+            renderHatlarGrid(hatlar);
+            updateStats();
+            closeHatModal();
+        });
+
+        // Filter function
+        function filterHatlar() {
+            const aramaText = document.getElementById('hatArama').value.toLowerCase();
+            const durumFilter = document.getElementById('durumFilter').value;
+
+            let filteredHatlar = hatlar;
+
+            if (aramaText) {
+                filteredHatlar = filteredHatlar.filter(h => 
+                    h.numarasi.toLowerCase().includes(aramaText) ||
+                    h.adi.toLowerCase().includes(aramaText) ||
+                    h.baslangic.toLowerCase().includes(aramaText) ||
+                    h.bitis.toLowerCase().includes(aramaText)
+                );
+            }
+
+            if (durumFilter) {
+                filteredHatlar = filteredHatlar.filter(h => h.durum === durumFilter);
+            }
+
+            renderHatlarGrid(filteredHatlar);
+        }
+
+        // Search on input
+        document.getElementById('hatArama').addEventListener('input', filterHatlar);
+
+        // Initialize page
+        window.addEventListener('load', () => {
+            if (checkSession()) {
+                loadUserData();
+                loadHatlar();
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            
+            if (!dropdown.contains(event.target)) {
+                dropdownMenu.classList.add('hidden');
+                document.getElementById('dropdownIcon').classList.remove('rotate-180');
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('hatModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeHatModal();
+            }
+        });
+    </script>
+</body>
+</html>

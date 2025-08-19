@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vardiya Planı - İETT Şoför Paneli</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'soft-blue': '#e0f2fe',
+                        'soft-green': '#f0fdf4',
+                        'soft-purple': '#faf5ff',
+                        'soft-gray': '#f8fafc',
+                        'accent-blue': '#0ea5e9',
+                        'accent-green': '#22c55e',
+                        'accent-purple': '#a855f7'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-soft-gray to-soft-blue min-h-screen">
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-accent-blue p-2 rounded-lg">
+                        <i class="fas fa-bus text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">İETT</h1>
+                        <p class="text-xs text-gray-500">Sefer Takip Sistemi</p>
+                    </div>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="/sofor-dashboard" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Ana Sayfa</a>
+                    <a href="/vardiya-plani" class="text-accent-blue font-medium border-b-2 border-accent-blue pb-1">Vardiya Planı</a>
+                    <a href="/istatistik" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">İstatistik</a>
+                </nav>
+                
+                <!-- User Info Dropdown -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative" id="userDropdown">
+                        <button class="flex items-center space-x-3 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 transition-all shadow-sm" onclick="toggleUserDropdown()">
+                            <div class="w-8 h-8 bg-gradient-to-r from-accent-blue to-blue-600 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white text-sm"></i>
+                            </div>
+                            <div class="hidden sm:block text-left">
+                                <div class="text-sm font-semibold text-gray-800" id="headerUserName">Şoför</div>
+                                <div class="text-xs text-gray-500" id="headerUserRole">Şoför</div>
+                            </div>
+                            <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" id="dropdownIcon"></i>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 hidden" id="dropdownMenu">
+                            <div class="px-4 py-3 border-b border-gray-100">
+                                <div class="text-sm font-semibold text-gray-800" id="dropdownUserName">Şoför</div>
+                                <div class="text-xs text-gray-500" id="dropdownUserEmail">sofor@iett.gov.tr</div>
+                                <div class="text-xs text-accent-blue font-medium mt-1">Şoför</div>
+                            </div>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-user-circle mr-3 text-gray-400"></i>
+                                Profil Ayarları
+                            </a>
+                            <div class="border-t border-gray-100 mt-2 pt-2">
+                                <button class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors" onclick="logout()">
+                                    <i class="fas fa-sign-out-alt mr-3 text-red-500"></i>
+                                    Çıkış Yap
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Vardiya Planı</h1>
+                    <p class="text-gray-600 mt-2">Haftalık ve günlük vardiya programınızı görüntüleyin</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <button onclick="previousWeek()" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <span class="text-lg font-semibold text-gray-900" id="currentWeek">Bu Hafta</span>
+                        <button onclick="nextWeek()" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <button onclick="goToToday()" class="bg-accent-blue hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-calendar-day mr-2"></i>Bugün
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Bu Hafta Seferler</p>
+                        <p class="text-2xl font-bold text-gray-900" id="weeklyTrips">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-route text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Çalışma Günü</p>
+                        <p class="text-2xl font-bold text-green-600" id="workingDays">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-calendar-check text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Toplam Saat</p>
+                        <p class="text-2xl font-bold text-purple-600" id="totalHours">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-clock text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Ortalama Mesafe</p>
+                        <p class="text-2xl font-bold text-orange-600" id="avgDistance">0 km</p>
+                    </div>
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-road text-orange-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar View -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-calendar-week mr-2 text-accent-blue"></i>
+                    Haftalık Vardiya Takvimi
+                </h3>
+            </div>
+            
+            <!-- Calendar Header -->
+            <div class="grid grid-cols-7 border-b border-gray-200">
+                <div class="p-4 text-center font-medium text-gray-700 bg-gray-50">Pazartesi</div>
+                <div class="p-4 text-center font-medium text-gray-700 bg-gray-50">Salı</div>
+                <div class="p-4 text-center font-medium text-gray-700 bg-gray-50">Çarşamba</div>
+                <div class="p-4 text-center font-medium text-gray-700 bg-gray-50">Perşembe</div>
+                <div class="p-4 text-center font-medium text-gray-700 bg-gray-50">Cuma</div>
+                <div class="p-4 text-center font-medium text-gray-700 bg-gray-50">Cumartesi</div>
+                <div class="p-4 text-center font-medium text-gray-700 bg-gray-50">Pazar</div>
+            </div>
+            
+            <!-- Calendar Body -->
+            <div class="grid grid-cols-7" id="calendarBody">
+                <!-- Calendar days will be populated here -->
+            </div>
+        </div>
+
+        <!-- Today's Detail -->
+        <div class="mt-8 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="p-6 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-calendar-day mr-2 text-accent-blue"></i>
+                    <span id="selectedDateTitle">Bugünkü Detaylar</span>
+                </h3>
+            </div>
+            <div class="p-6">
+                <div id="dayDetails" class="space-y-4">
+                    <!-- Day details will be populated here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentWeekStart = new Date();
+        let selectedDate = new Date();
+        let vardiyaData = [];
+
+        // Session kontrolü
+        function checkSession() {
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            const userRole = sessionStorage.getItem('userRole');
+            
+            if (!isLoggedIn || isLoggedIn !== 'true') {
+                window.location.href = '/login';
+                return false;
+            }
+            
+            // Şoför olmayan kullanıcıları ana dashboard'a yönlendir
+            if (userRole !== 'sofor') {
+                window.location.href = '/dashboard';
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Kullanıcı verilerini yükle
+        function loadUserData() {
+            const userName = sessionStorage.getItem('userName') || 'Şoför';
+            const userEmail = sessionStorage.getItem('userEmail') || 'sofor@iett.gov.tr';
+            
+            document.getElementById('headerUserName').textContent = userName;
+            document.getElementById('dropdownUserName').textContent = userName;
+            document.getElementById('dropdownUserEmail').textContent = userEmail;
+        }
+
+        // Dropdown toggle
+        function toggleUserDropdown() {
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            const dropdownIcon = document.getElementById('dropdownIcon');
+            
+            dropdownMenu.classList.toggle('hidden');
+            dropdownIcon.classList.toggle('rotate-180');
+        }
+
+        // Çıkış yap
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = '/login';
+        }
+
+        // Haftanın başlangıcını al (Pazartesi)
+        function getWeekStart(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Pazartesi'yi başlangıç yap
+            return new Date(d.setDate(diff));
+        }
+
+        // Önceki hafta
+        function previousWeek() {
+            currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+            updateCalendar();
+            loadWeeklyData();
+        }
+
+        // Sonraki hafta
+        function nextWeek() {
+            currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+            updateCalendar();
+            loadWeeklyData();
+        }
+
+        // Bugüne git
+        function goToToday() {
+            currentWeekStart = getWeekStart(new Date());
+            selectedDate = new Date();
+            updateCalendar();
+            loadWeeklyData();
+            showDayDetails(selectedDate);
+        }
+
+        // Takvimi güncelle
+        function updateCalendar() {
+            const weekStart = new Date(currentWeekStart);
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+            
+            // Hafta başlığını güncelle
+            const weekTitle = `${weekStart.getDate()} ${getMonthName(weekStart.getMonth())} - ${weekEnd.getDate()} ${getMonthName(weekEnd.getMonth())} ${weekEnd.getFullYear()}`;
+            document.getElementById('currentWeek').textContent = weekTitle;
+            
+            // Takvim gövdesini oluştur
+            const calendarBody = document.getElementById('calendarBody');
+            calendarBody.innerHTML = '';
+            
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(weekStart);
+                date.setDate(date.getDate() + i);
+                
+                const dayElement = createDayElement(date);
+                calendarBody.appendChild(dayElement);
+            }
+        }
+
+        // Gün elementi oluştur
+        function createDayElement(date) {
+            const dayDiv = document.createElement('div');
+            const isToday = date.toDateString() === new Date().toDateString();
+            const isSelected = date.toDateString() === selectedDate.toDateString();
+            const dayVardiya = getDayVardiya(date);
+            
+            dayDiv.className = `p-4 border-r border-b border-gray-200 min-h-[120px] cursor-pointer hover:bg-gray-50 transition-colors ${
+                isToday ? 'bg-blue-50' : ''
+            } ${
+                isSelected ? 'ring-2 ring-accent-blue' : ''
+            }`;
+            
+            dayDiv.onclick = () => selectDay(date);
+            
+            const dayNumber = date.getDate();
+            const dayName = getDayName(date.getDay());
+            
+            dayDiv.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <div class="text-sm text-gray-500">${dayName}</div>
+                        <div class="text-lg font-semibold ${isToday ? 'text-blue-600' : 'text-gray-900'}">${dayNumber}</div>
+                    </div>
+                    ${isToday ? '<div class="w-2 h-2 bg-blue-500 rounded-full"></div>' : ''}
+                </div>
+                <div class="space-y-1">
+                    ${dayVardiya.map(vardiya => `
+                        <div class="text-xs p-1 rounded ${getVardiyaColor(vardiya.durum)} truncate">
+                            <div class="font-medium">${vardiya.hatKodu}</div>
+                            <div>${vardiya.baslangic} - ${vardiya.bitis}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            return dayDiv;
+        }
+
+        // Gün seç
+        function selectDay(date) {
+            selectedDate = new Date(date);
+            updateCalendar();
+            showDayDetails(date);
+        }
+
+        // Gün detaylarını göster
+        function showDayDetails(date) {
+            const dayVardiya = getDayVardiya(date);
+            const dateStr = date.toLocaleDateString('tr-TR', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            document.getElementById('selectedDateTitle').textContent = `${dateStr} Detayları`;
+            
+            const detailsContainer = document.getElementById('dayDetails');
+            
+            if (dayVardiya.length === 0) {
+                detailsContainer.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-calendar-times text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500">Bu gün için planlanmış vardiya bulunmuyor.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            detailsContainer.innerHTML = dayVardiya.map(vardiya => `
+                <div class="flex items-center p-4 bg-gray-50 rounded-lg">
+                    <div class="w-12 h-12 ${getVardiyaIconBg(vardiya.durum)} rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-bus text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-semibold text-gray-900">${vardiya.hatKodu} - ${vardiya.hatAdi}</h4>
+                                <p class="text-sm text-gray-600">${vardiya.baslangic} - ${vardiya.bitis}</p>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <i class="fas fa-route mr-1"></i>${vardiya.mesafe} km
+                                    <i class="fas fa-clock ml-3 mr-1"></i>${vardiya.sure} dk
+                                </p>
+                            </div>
+                            <span class="text-xs px-2 py-1 rounded-full ${getVardiyaColor(vardiya.durum)}">
+                                ${vardiya.durum}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Vardiya verilerini yükle
+        async function loadWeeklyData() {
+            try {
+                const userId = sessionStorage.getItem('userId');
+                
+                if (userId) {
+                    const weekStart = new Date(currentWeekStart);
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekEnd.getDate() + 6);
+                    
+                    const response = await fetch(`/api/seferler/sofor/${userId}?start=${weekStart.toISOString()}&end=${weekEnd.toISOString()}`);
+                    if (response.ok) {
+                        const seferler = await response.json();
+                        processVardiyaData(seferler);
+                    } else {
+                        loadDemoVardiyaData();
+                    }
+                } else {
+                    loadDemoVardiyaData();
+                }
+            } catch (error) {
+                console.error('Vardiya verileri yüklenirken hata:', error);
+                loadDemoVardiyaData();
+            }
+            
+            updateWeeklyStats();
+        }
+
+        // Demo vardiya verilerini yükle
+        function loadDemoVardiyaData() {
+            const today = new Date();
+            const weekStart = new Date(currentWeekStart);
+            
+            vardiyaData = [];
+            
+            // Her gün için demo vardiya oluştur
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(weekStart);
+                date.setDate(date.getDate() + i);
+                
+                // Hafta sonu değilse vardiya ekle
+                if (date.getDay() !== 0 && date.getDay() !== 6) {
+                    vardiyaData.push({
+                        tarih: date.toDateString(),
+                        hatKodu: '15',
+                        hatAdi: 'Eminönü - Bağcılar',
+                        baslangic: '08:00',
+                        bitis: '16:00',
+                        mesafe: 127,
+                        sure: 480,
+                        durum: date < today ? 'Tamamlandı' : date.toDateString() === today.toDateString() ? 'Devam Ediyor' : 'Planlandı'
+                    });
+                    
+                    if (Math.random() > 0.5) {
+                        vardiyaData.push({
+                            tarih: date.toDateString(),
+                            hatKodu: '34',
+                            hatAdi: 'Kadıköy - Mecidiyeköy',
+                            baslangic: '17:00',
+                            bitis: '20:00',
+                            mesafe: 45,
+                            sure: 180,
+                            durum: date < today ? 'Tamamlandı' : 'Planlandı'
+                        });
+                    }
+                }
+            }
+        }
+
+        // API verilerini işle
+        function processVardiyaData(seferler) {
+            vardiyaData = seferler.map(sefer => {
+                const kalkis = new Date(sefer.kalkisZamani);
+                const varis = new Date(sefer.varisZamani);
+                
+                return {
+                    tarih: kalkis.toDateString(),
+                    hatKodu: sefer.hatKodu || 'N/A',
+                    hatAdi: sefer.hatAdi || 'Hat Bilgisi',
+                    baslangic: kalkis.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'}),
+                    bitis: varis.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'}),
+                    mesafe: sefer.gidilenMesafeKm || 0,
+                    sure: Math.round((varis - kalkis) / (1000 * 60)), // dakika cinsinden
+                    durum: sefer.durum || 'Planlandı'
+                };
+            });
+        }
+
+        // Belirli bir günün vardiyasını al
+        function getDayVardiya(date) {
+            return vardiyaData.filter(vardiya => vardiya.tarih === date.toDateString());
+        }
+
+        // Haftalık istatistikleri güncelle
+        function updateWeeklyStats() {
+            const weekStart = new Date(currentWeekStart);
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+            
+            const weekVardiya = vardiyaData.filter(vardiya => {
+                const vardiyaDate = new Date(vardiya.tarih);
+                return vardiyaDate >= weekStart && vardiyaDate <= weekEnd;
+            });
+            
+            const totalTrips = weekVardiya.length;
+            const workingDays = new Set(weekVardiya.map(v => v.tarih)).size;
+            const totalHours = Math.round(weekVardiya.reduce((sum, v) => sum + v.sure, 0) / 60);
+            const avgDistance = totalTrips > 0 ? Math.round(weekVardiya.reduce((sum, v) => sum + v.mesafe, 0) / totalTrips) : 0;
+            
+            document.getElementById('weeklyTrips').textContent = totalTrips;
+            document.getElementById('workingDays').textContent = workingDays;
+            document.getElementById('totalHours').textContent = totalHours + ' saat';
+            document.getElementById('avgDistance').textContent = avgDistance + ' km';
+        }
+
+        // Yardımcı fonksiyonlar
+        function getMonthName(month) {
+            const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+                          'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+            return months[month];
+        }
+
+        function getDayName(day) {
+            const days = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+            return days[day];
+        }
+
+        function getVardiyaColor(durum) {
+            switch (durum) {
+                case 'Tamamlandı': return 'bg-green-100 text-green-800';
+                case 'Devam Ediyor': return 'bg-blue-100 text-blue-800';
+                case 'Planlandı': return 'bg-gray-100 text-gray-800';
+                case 'İptal': return 'bg-red-100 text-red-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function getVardiyaIconBg(durum) {
+            switch (durum) {
+                case 'Tamamlandı': return 'bg-green-500';
+                case 'Devam Ediyor': return 'bg-blue-500';
+                case 'Planlandı': return 'bg-gray-500';
+                case 'İptal': return 'bg-red-500';
+                default: return 'bg-gray-500';
+            }
+        }
+
+        // Dışarı tıklama ile dropdown'ı kapat
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            
+            if (!dropdown.contains(event.target)) {
+                dropdownMenu.classList.add('hidden');
+                document.getElementById('dropdownIcon').classList.remove('rotate-180');
+            }
+        });
+
+        // Sayfa yüklendiğinde
+        window.addEventListener('load', () => {
+            if (checkSession()) {
+                loadUserData();
+                currentWeekStart = getWeekStart(new Date());
+                selectedDate = new Date();
+                updateCalendar();
+                loadWeeklyData();
+                showDayDetails(selectedDate);
+            }
+        });
+
+        // Sayfa odaklandığında session kontrolü
+        window.addEventListener('focus', function() {
+            checkSession();
+        });
+    </script>
+</body>
+</html>

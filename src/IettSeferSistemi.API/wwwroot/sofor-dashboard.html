@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şoför Dashboard - İETT Sefer Takip Sistemi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'soft-blue': '#e0f2fe',
+                        'soft-green': '#f0fdf4',
+                        'soft-purple': '#faf5ff',
+                        'soft-gray': '#f8fafc',
+                        'accent-blue': '#0ea5e9',
+                        'accent-green': '#22c55e',
+                        'accent-purple': '#a855f7'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-soft-gray to-soft-blue min-h-screen">
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-accent-blue p-2 rounded-lg">
+                        <i class="fas fa-bus text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">İETT</h1>
+                        <p class="text-xs text-gray-500">Sefer Takip Sistemi</p>
+                    </div>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="/sofor-dashboard" class="text-accent-blue font-medium border-b-2 border-accent-blue pb-1">Ana Sayfa</a>
+                    <a href="/vardiya-plani" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">Vardiya Planı</a>
+                    <a href="/istatistik" class="text-gray-600 hover:text-accent-blue transition-colors font-medium">İstatistik</a>
+                </nav>
+                
+                <!-- User Info Dropdown -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative" id="userDropdown">
+                        <button class="flex items-center space-x-3 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 transition-all shadow-sm" onclick="toggleUserDropdown()">
+                            <div class="w-8 h-8 bg-gradient-to-r from-accent-blue to-blue-600 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white text-sm"></i>
+                            </div>
+                            <div class="hidden sm:block text-left">
+                                <div class="text-sm font-semibold text-gray-800" id="headerUserName">Şoför</div>
+                                <div class="text-xs text-gray-500" id="headerUserRole">Şoför</div>
+                            </div>
+                            <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" id="dropdownIcon"></i>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 hidden" id="dropdownMenu">
+                            <div class="px-4 py-3 border-b border-gray-100">
+                                <div class="text-sm font-semibold text-gray-800" id="dropdownUserName">Şoför</div>
+                                <div class="text-xs text-gray-500" id="dropdownUserEmail">sofor@iett.gov.tr</div>
+                                <div class="text-xs text-accent-blue font-medium mt-1">Şoför</div>
+                            </div>
+                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-user-circle mr-3 text-gray-400"></i>
+                                Profil Ayarları
+                            </a>
+                            <div class="border-t border-gray-100 mt-2 pt-2">
+                                <button class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors" onclick="logout()">
+                                    <i class="fas fa-sign-out-alt mr-3 text-red-500"></i>
+                                    Çıkış Yap
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Section -->
+        <div class="mb-8">
+            <div class="bg-gradient-to-r from-accent-blue to-blue-600 rounded-xl p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold mb-2">Hoş Geldiniz!</h2>
+                        <p class="text-blue-100" id="welcomeMessage">Bugünkü vardiya planınızı ve istatistiklerinizi görüntüleyebilirsiniz.</p>
+                    </div>
+                    <div class="hidden md:block">
+                        <i class="fas fa-steering-wheel text-6xl text-blue-200"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Bugünkü Seferler</p>
+                        <p class="text-2xl font-bold text-gray-900" id="todayTrips">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-route text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Tamamlanan</p>
+                        <p class="text-2xl font-bold text-green-600" id="completedTrips">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Toplam Mesafe</p>
+                        <p class="text-2xl font-bold text-purple-600" id="totalDistance">0 km</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-road text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Çalışma Saati</p>
+                        <p class="text-2xl font-bold text-orange-600" id="workingHours">0 saat</p>
+                    </div>
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-clock text-orange-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Schedule -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Bugünkü Vardiya -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                <div class="p-6 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-calendar-day mr-2 text-accent-blue"></i>
+                        Bugünkü Vardiya
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <div id="todaySchedule" class="space-y-4">
+                        <!-- Schedule items will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Son Seferler -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                <div class="p-6 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-history mr-2 text-accent-blue"></i>
+                        Son Seferler
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <div id="recentTrips" class="space-y-4">
+                        <!-- Recent trips will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-8">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-bolt mr-2 text-accent-blue"></i>
+                    Hızlı İşlemler
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <a href="/vardiya-plani" class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-calendar-alt text-blue-600"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">Vardiya Planı</div>
+                            <div class="text-sm text-gray-500">Haftalık programınızı görün</div>
+                        </div>
+                    </a>
+                    
+                    <a href="/istatistik" class="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
+                        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-chart-bar text-green-600"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">İstatistikler</div>
+                            <div class="text-sm text-gray-500">Performans raporlarınız</div>
+                        </div>
+                    </a>
+                    
+                    <button onclick="refreshData()" class="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-sync-alt text-purple-600"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">Verileri Yenile</div>
+                            <div class="text-sm text-gray-500">Güncel bilgileri getir</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Session kontrolü
+        function checkSession() {
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            const userRole = sessionStorage.getItem('userRole');
+            
+            if (!isLoggedIn || isLoggedIn !== 'true') {
+                window.location.href = '/login';
+                return false;
+            }
+            
+            // Şoför olmayan kullanıcıları ana dashboard'a yönlendir
+            if (userRole !== 'sofor') {
+                window.location.href = '/dashboard';
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Kullanıcı verilerini yükle
+        function loadUserData() {
+            const userName = sessionStorage.getItem('userName') || 'Şoför';
+            const userEmail = sessionStorage.getItem('userEmail') || 'sofor@iett.gov.tr';
+            
+            document.getElementById('headerUserName').textContent = userName;
+            document.getElementById('dropdownUserName').textContent = userName;
+            document.getElementById('dropdownUserEmail').textContent = userEmail;
+            
+            // Hoş geldin mesajını güncelle
+            document.getElementById('welcomeMessage').textContent = `Merhaba ${userName}, bugünkü vardiya planınızı ve istatistiklerinizi görüntüleyebilirsiniz.`;
+        }
+
+        // Dropdown toggle
+        function toggleUserDropdown() {
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            const dropdownIcon = document.getElementById('dropdownIcon');
+            
+            dropdownMenu.classList.toggle('hidden');
+            dropdownIcon.classList.toggle('rotate-180');
+        }
+
+        // Çıkış yap
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = '/login';
+        }
+
+        // Verileri yenile
+        function refreshData() {
+            loadDashboardData();
+        }
+
+        // Dashboard verilerini yükle
+        async function loadDashboardData() {
+            try {
+                // Şoför ID'sini session'dan al
+                const userId = sessionStorage.getItem('userId');
+                
+                if (userId) {
+                    // API'den şoför verilerini çek
+                    const seferResponse = await fetch(`/api/seferler/sofor/${userId}`);
+                    const statsResponse = await fetch(`/api/raporlar/sofor-istatistik/${userId}`);
+                    
+                    if (seferResponse.ok && statsResponse.ok) {
+                        const seferler = await seferResponse.json();
+                        const stats = await statsResponse.json();
+                        updateStats(seferler, stats);
+                        loadTodaySchedule(seferler);
+                        loadRecentTrips(seferler);
+                    } else {
+                        // Demo veriler
+                        loadDemoData();
+                    }
+                } else {
+                    loadDemoData();
+                }
+            } catch (error) {
+                console.error('Dashboard verileri yüklenirken hata:', error);
+                loadDemoData();
+            }
+        }
+
+        // Demo veriler
+        function loadDemoData() {
+            document.getElementById('todayTrips').textContent = '5';
+            document.getElementById('completedTrips').textContent = '3';
+            document.getElementById('totalDistance').textContent = '127 km';
+            document.getElementById('workingHours').textContent = '8 saat';
+            
+            // Bugünkü vardiya
+            const todaySchedule = document.getElementById('todaySchedule');
+            todaySchedule.innerHTML = `
+                <div class="flex items-center p-3 bg-blue-50 rounded-lg">
+                    <div class="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-900">15 - Eminönü → Bağcılar</div>
+                        <div class="text-sm text-gray-500">08:00 - 09:30</div>
+                    </div>
+                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Aktif</span>
+                </div>
+                <div class="flex items-center p-3 bg-gray-50 rounded-lg">
+                    <div class="w-3 h-3 bg-gray-400 rounded-full mr-3"></div>
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-900">15 - Bağcılar → Eminönü</div>
+                        <div class="text-sm text-gray-500">10:00 - 11:30</div>
+                    </div>
+                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">Bekliyor</span>
+                </div>
+            `;
+            
+            // Son seferler
+            const recentTrips = document.getElementById('recentTrips');
+            recentTrips.innerHTML = `
+                <div class="flex items-center p-3 bg-green-50 rounded-lg">
+                    <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-900">34 - Kadıköy → Mecidiyeköy</div>
+                        <div class="text-sm text-gray-500">Dün 16:30 - 18:00</div>
+                    </div>
+                    <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Tamamlandı</span>
+                </div>
+                <div class="flex items-center p-3 bg-green-50 rounded-lg">
+                    <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-900">500T - Taksim → Beylikdüzü</div>
+                        <div class="text-sm text-gray-500">Dün 14:00 - 15:45</div>
+                    </div>
+                    <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Tamamlandı</span>
+                </div>
+            `;
+        }
+
+        // İstatistikleri güncelle
+        function updateStats(seferler, stats) {
+            // API verilerinden istatistikleri hesapla
+            const today = new Date().toDateString();
+            const todaySeferler = seferler.filter(s => new Date(s.kalkisZamani).toDateString() === today);
+            const completedSeferler = todaySeferler.filter(s => s.durum === 'Tamamlandi');
+            
+            document.getElementById('todayTrips').textContent = todaySeferler.length;
+            document.getElementById('completedTrips').textContent = completedSeferler.length;
+            
+            // Toplam mesafe hesapla
+            const totalDistance = completedSeferler.reduce((sum, s) => sum + (s.gidilenMesafeKm || 0), 0);
+            document.getElementById('totalDistance').textContent = totalDistance + ' km';
+            
+            // API'den gelen çalışma saati istatistiğini kullan (zaten "saat" kelimesini içeriyor)
+            document.getElementById('workingHours').textContent = stats?.istatistikler?.toplamCalismaSaati_label || '0 saat';
+        }
+
+        // Bugünkü vardiya planını yükle
+        function loadTodaySchedule(seferler) {
+            const today = new Date().toDateString();
+            const todaySeferler = seferler.filter(s => new Date(s.kalkisZamani).toDateString() === today);
+            
+            const scheduleContainer = document.getElementById('todaySchedule');
+            
+            if (todaySeferler.length === 0) {
+                scheduleContainer.innerHTML = '<p class="text-gray-500 text-center py-4">Bugün için planlanmış sefer bulunmuyor.</p>';
+                return;
+            }
+            
+            scheduleContainer.innerHTML = todaySeferler.map(sefer => {
+                const kalkis = new Date(sefer.kalkisZamani);
+                const varis = new Date(sefer.varisZamani);
+                const durumClass = sefer.durum === 'Tamamlandi' ? 'bg-green-50 text-green-800' : 
+                                 sefer.durum === 'Devam Ediyor' ? 'bg-blue-50 text-blue-800' : 'bg-gray-50 text-gray-600';
+                const dotClass = sefer.durum === 'Tamamlandi' ? 'bg-green-500' : 
+                               sefer.durum === 'Devam Ediyor' ? 'bg-blue-500' : 'bg-gray-400';
+                
+                return `
+                    <div class="flex items-center p-3 ${durumClass.includes('green') ? 'bg-green-50' : durumClass.includes('blue') ? 'bg-blue-50' : 'bg-gray-50'} rounded-lg">
+                        <div class="w-3 h-3 ${dotClass} rounded-full mr-3"></div>
+                        <div class="flex-1">
+                            <div class="font-medium text-gray-900">${sefer.hatKodu} - ${sefer.hatAdi || 'Hat Bilgisi'}</div>
+                            <div class="text-sm text-gray-500">${kalkis.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})} - ${varis.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})}</div>
+                        </div>
+                        <span class="text-xs ${durumClass} px-2 py-1 rounded-full">${sefer.durum}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Son seferleri yükle
+        function loadRecentTrips(seferler) {
+            const completedSeferler = seferler.filter(s => s.durum === 'Tamamlandi')
+                                            .sort((a, b) => new Date(b.varisZamani) - new Date(a.varisZamani))
+                                            .slice(0, 5);
+            
+            const recentContainer = document.getElementById('recentTrips');
+            
+            if (completedSeferler.length === 0) {
+                recentContainer.innerHTML = '<p class="text-gray-500 text-center py-4">Henüz tamamlanmış sefer bulunmuyor.</p>';
+                return;
+            }
+            
+            recentContainer.innerHTML = completedSeferler.map(sefer => {
+                const varis = new Date(sefer.varisZamani);
+                const kalkis = new Date(sefer.kalkisZamani);
+                
+                return `
+                    <div class="flex items-center p-3 bg-green-50 rounded-lg">
+                        <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                        <div class="flex-1">
+                            <div class="font-medium text-gray-900">${sefer.hatKodu} - ${sefer.hatAdi || 'Hat Bilgisi'}</div>
+                            <div class="text-sm text-gray-500">${varis.toLocaleDateString('tr-TR')} ${kalkis.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})} - ${varis.toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})}</div>
+                        </div>
+                        <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Tamamlandı</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Dışarı tıklama ile dropdown'ı kapat
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            
+            if (!dropdown.contains(event.target)) {
+                dropdownMenu.classList.add('hidden');
+                document.getElementById('dropdownIcon').classList.remove('rotate-180');
+            }
+        });
+
+        // Sayfa yüklendiğinde
+        window.addEventListener('load', () => {
+            if (checkSession()) {
+                loadUserData();
+                loadDashboardData();
+            }
+        });
+
+        // Sayfa odaklandığında session kontrolü
+        window.addEventListener('focus', function() {
+            checkSession();
+        });
+    </script>
+</body>
+</html>

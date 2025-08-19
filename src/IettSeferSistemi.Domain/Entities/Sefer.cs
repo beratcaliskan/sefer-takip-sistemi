@@ -1,3 +1,5 @@
+using IettSeferSistemi.Domain.Enums;
+
 namespace IettSeferSistemi.Domain.Entities;
 
 public class Sefer : TemelEntity
@@ -12,9 +14,9 @@ public class Sefer : TemelEntity
     public Otobus Otobus { get; set; } = null!;
 
     public DateTime KalkisZamani { get; set; }
-    public DateTime VarisZamani { get; set; }
+    public DateTime? VarisZamani { get; set; }
 
-    public string Durum { get; set; } = "Planlandi"; // Planlandi, Tamamlandi, Iptal
+    public SeferDurum Durum { get; set; } = SeferDurum.Planlandi;
     public double GidilenMesafeKm { get; set; } = 0;
 
     public ICollection<YolcuSayim> YolcuSayimlari { get; set; } = new List<YolcuSayim>();
